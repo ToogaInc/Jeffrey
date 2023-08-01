@@ -1,0 +1,21 @@
+{
+  "name": "jeffrey",
+  "version": "0.0.1",
+  "description": "A bot mainly made for fun.",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "start": "node dist/index.js",
+    "all": "npm run compile && npm run start"
+  },
+  "author": "Tooga Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.12.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "typescript": "^5.1.6"
+  }
+}
