@@ -1,7 +1,7 @@
 // main.js
 import { config } from 'dotenv';
 import { Client, ClientOptions, GatewayIntentBits, REST, Routes } from 'discord.js';
-import { data as pingData, execute as pingExecute } from './commands/ping';
+import { info as pingInfo, run as pingRun } from './commands/ping';
 
 config();
 
@@ -29,7 +29,7 @@ async function main() {
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationCommands(clientID!), { body: [pingData.toJSON()] });
+    await rest.put(Routes.applicationCommands(clientID!), { body: [pingInfo.toJSON()] });
 
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
@@ -43,7 +43,7 @@ client.on('interactionCreate', async (interaction) => {
   const { commandName } = interaction;
 
   if (commandName === 'ping') {
-    await pingExecute(interaction);
+    await pingRun(interaction);
   }
 });
 
