@@ -1,12 +1,18 @@
 // main.js
 import { config } from 'dotenv';
-import { Client, ClientOptions, GatewayIntentBits, REST, Routes } from 'discord.js';
-import { info as pingInfo, run as pingRun } from './commands/ping';
+import { Client, 
+  ClientOptions, 
+  GatewayIntentBits, 
+  REST, 
+  Routes } from 'discord.js';
+import { Ping } from './commands/ping';
+
 
 config();
 
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
+const guildID = process.env.GUILD_ID;
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -19,6 +25,8 @@ const options: ClientOptions = {
 
 const client = new Client(options);
 
+client.login(token);
+
 client.once('ready', () => {
   console.log(`Logged in as ${client.user!.tag}`);
 });
@@ -29,7 +37,7 @@ async function main() {
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationCommands(clientID!), { body: [pingInfo.toJSON()] });
+    await rest.put(Routes.applicationGuildCommands(clientID!, guildID!), { body: [Ping.info.toJSON()] });
 
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
@@ -43,13 +51,8 @@ client.on('interactionCreate', async (interaction) => {
   const { commandName } = interaction;
 
   if (commandName === 'ping') {
-    await pingRun(interaction);
+    await Ping.run(interaction);
   }
 });
-
-
-client.login(token);
-
-export default client;
 
 main();

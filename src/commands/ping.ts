@@ -1,10 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
-import client from '../index';
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
 
-export const info = new SlashCommandBuilder()
-  .setName('ping')
-  .setDescription('Tells you the bot\'s ping (ms)');
-
-export async function run(interaction: any) {
-  await interaction.reply(`${client.ws.ping}ms`);
-}
+export const Ping = {
+  info: new SlashCommandBuilder()
+    .setName('ping')
+    .setDescription("Tells you the bot's ping (ms)"),
+    
+  run: async (interaction: CommandInteraction): Promise<void> => {
+    await interaction.reply(`${interaction.client.ws.ping}ms`);
+  }
+};
