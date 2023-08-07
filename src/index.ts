@@ -1,6 +1,7 @@
 // main.js
 import { config } from 'dotenv';
-import { Client, 
+import { 
+  Client, 
   ClientOptions, 
   GatewayIntentBits, 
   REST, 
