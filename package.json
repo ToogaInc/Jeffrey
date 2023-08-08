@@ -11,6 +11,7 @@
   "author": "Tooga Inc.",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.4.0",
     "discord.js": "^14.12.1",
     "dotenv": "^16.3.1"
   },
