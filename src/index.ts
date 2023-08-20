@@ -5,7 +5,9 @@ import {
   ClientOptions, 
   REST } from 'discord.js';
 import { Ping } from './commands/ping';
+import { Mock } from './commands/mock';
 import { Routes, GatewayIntentBits } from 'discord-api-types/v9';
+
 
 
 config();
@@ -37,13 +39,19 @@ async function main() {
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationGuildCommands(clientID!, guildID!), { body: [Ping.info.toJSON()] });
+    await rest.put(Routes.applicationGuildCommands(clientID!, guildID!), { body: [
+      Ping.info.toJSON(),
+      Mock.info.toJSON()
+      ] 
+    });
 
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
   }
 }
+
+export let mockTargets = new Set();
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
@@ -52,6 +60,11 @@ client.on('interactionCreate', async (interaction) => {
 
   if (commandName === 'ping') {
     await Ping.run(interaction);
+  }
+  if (commandName === 'mock') {
+    console.log(`${interaction.user} is attempting to use the mock command.`);
+    await Mock.run(interaction);
+    console.log(`Current mock list: ${Array.from(mockTargets)}`);
   }
 });
 
