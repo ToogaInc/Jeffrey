@@ -3,10 +3,9 @@ import { config } from 'dotenv';
 import { 
   Client, 
   ClientOptions, 
-  GatewayIntentBits, 
-  REST, 
-  Routes } from 'discord.js';
+  REST } from 'discord.js';
 import { Ping } from './commands/ping';
+import { Routes, GatewayIntentBits } from 'discord-api-types/v9';
 
 
 config();
