@@ -47,5 +47,6 @@ export const Mock = {
         }
         mockTargets.add(target.id);
         await interaction.reply(`Sure thing, I will begin mocking ${target}!`);
+        console.log(`${interaction.user} used the mock command on ${target.username} (${target.id})`);
     }
 };

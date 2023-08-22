@@ -9,6 +9,7 @@ import {
 } from 'discord.js';
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
+import { Cat } from './commands/cat';
 
 config();
 
@@ -38,54 +39,55 @@ const rest = new REST({ version: '10' }).setToken(token!);
 
 async function main() {
   try {
-      console.log('Started refreshing application (/) commands.');
+    console.log('Started refreshing application (/) commands.');
 
-      await rest.put(
-          Routes.applicationGuildCommands(clientID!, guildID!),
-          {
-              body: [
-                  Ping.info.toJSON(),
-                  Mock.info.toJSON()
-              ]
-          }
-      );
+    await rest.put(
+      Routes.applicationGuildCommands(clientID!, guildID!),
+      {
+        body: [
+          Ping.info.toJSON(),
+          Mock.info.toJSON(),
+          Cat.info.toJSON()
+        ]
+      }
+    );
 
-      console.log('Successfully reloaded application (/) commands.');
+    console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
-      console.error(error);
+    console.error(error);
   }
 }
 
 export const mockTargets = new Set();
 
 client.on('messageCreate', async message => {
-    if(!message.inGuild) return;
-    if(!message.channel.isTextBased()) return;
+  if (!message.inGuild) return;
+  if (!message.channel.isTextBased()) return;
 
-    if(mockTargets.has(message.author.id)){
-      let shouldBeLower = true;
-      let length = message.content.length;
-      let userMessage = message.content
-      let mockMessageArray = [...userMessage];
+  if (mockTargets.has(message.author.id)) {
+    let shouldBeLower = true;
+    let length = message.content.length;
+    let userMessage = message.content
+    let mockMessageArray = [...userMessage];
 
-      for(let i = 0; i < length; i++){
-        if (userMessage[i].toUpperCase() !== userMessage[i].toLowerCase()) {
-          if (shouldBeLower) {
-              mockMessageArray[i] = userMessage[i].toLowerCase();
-          } else {
-              mockMessageArray[i] = userMessage[i].toUpperCase();
-          }
-          shouldBeLower = !shouldBeLower;
+    for (let i = 0; i < length; i++) {
+      if (userMessage[i].toUpperCase() !== userMessage[i].toLowerCase()) {
+        if (shouldBeLower) {
+          mockMessageArray[i] = userMessage[i].toLowerCase();
+        } else {
+          mockMessageArray[i] = userMessage[i].toUpperCase();
         }
+        shouldBeLower = !shouldBeLower;
       }
-      let mockMessage = mockMessageArray.join('');
-
-      await message.delete();
-      console.log(`${message.author.username} (${message.author.id}) tried to send the message "${message.content}"`
-                  + ` in ${message.channel}, but they are being mocked!`);
-
-      await message.channel.send(`${message.author} says "${mockMessage}"`);
     }
+    let mockMessage = mockMessageArray.join('');
+
+    await message.delete();
+    console.log(`${message.author.username} (${message.author.id}) tried to send the message "${message.content}"`
+      + ` in ${message.channel}, but they are being mocked!`);
+
+    await message.channel.send(`${message.author} says "${mockMessage}"`);
+  }
 })
 
 client.on('interactionCreate', async (interaction) => {
@@ -97,9 +99,11 @@ client.on('interactionCreate', async (interaction) => {
     await Ping.run(interaction);
   }
   if (commandName === 'mock') {
-    console.log(`${interaction.user} is attempting to use the mock command.`);
     await Mock.run(interaction);
-    console.log(`Current mock list: ${Array.from(mockTargets)}`);
+  }
+  if (commandName === 'cat') {
+    await Cat.run(interaction);
+    console.log(`${interaction.user} used the cat command in ${interaction.channel}`);
   }
 });
 

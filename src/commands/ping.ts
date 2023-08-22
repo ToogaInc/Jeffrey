@@ -7,5 +7,6 @@ export const Ping = {
 
   run: async (interaction: CommandInteraction): Promise<void> => {
     await interaction.reply(`${interaction.client.ws.ping}ms`);
+    console.log(`${interaction.user} used the ping command in ${interaction.channel}`);
   }
 };
