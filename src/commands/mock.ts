@@ -19,8 +19,8 @@ export const Mock = {
         const role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
 
         if (!role) {
-            await interaction.reply('There is no "staff" role on this server.' + 
-                                     ' Contact a developer for more information.');
+            await interaction.reply('There is no "staff" role on this server.'
+                + ' Contact a developer for more information.');
             return;
         }
         //Finds the users ID, then checks if the user has a valid role
