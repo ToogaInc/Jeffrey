@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CommandInteraction, SlashCommandBuilder, EmbedBuilder, Embed } from 'discord.js';
+import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 
 export const Cat = {
     info: new SlashCommandBuilder()

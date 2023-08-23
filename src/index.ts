@@ -10,6 +10,7 @@ import {
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
+import { Poll } from './commands/poll';
 
 config();
 
@@ -47,7 +48,8 @@ async function main() {
         body: [
           Ping.info.toJSON(),
           Mock.info.toJSON(),
-          Cat.info.toJSON()
+          Cat.info.toJSON(),
+          Poll.info.toJSON()
         ]
       }
     );
@@ -111,10 +113,6 @@ client.on('interactionCreate', async (interaction) => {
   }
   cooldownMap.set(userID, Date.now() + cooldownTime);
 
-  for (const [userID, cooldownTime] of cooldownMap) {
-    console.log(`User ${userID}: Cooldown expires at ${new Date(cooldownTime).toLocaleString()}`);
-  }
-
   for (const [commandName, cooldownMap] of cooldown) {
     if (cooldownMap.has(userID) && cooldownMap.get(userID)! <= Date.now()) {
       cooldownMap.delete(userID);
@@ -132,6 +130,9 @@ client.on('interactionCreate', async (interaction) => {
   }
   if (commandName === 'cat') {
     await Cat.run(interaction);
+  }
+  if (commandName === 'poll') {
+    await Poll.run(interaction);
   }
 });
 
