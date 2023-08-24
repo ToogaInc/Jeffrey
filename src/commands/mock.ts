@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { CommandInteraction, Message, SlashCommandBuilder } from 'discord.js';
 import { mockTargets } from '../index';
 
 export const Mock = {
@@ -19,8 +19,8 @@ export const Mock = {
         const role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
 
         if (!role) {
-            await interaction.reply('There is no "staff" role on this server.' + 
-                                     ' Contact a developer for more information.');
+            await interaction.reply('There is no "staff" role on this server.'
+                + ' Contact a developer for more information.');
             return;
         }
         //Finds the users ID, then checks if the user has a valid role
@@ -47,5 +47,31 @@ export const Mock = {
         }
         mockTargets.add(target.id);
         await interaction.reply(`Sure thing, I will begin mocking ${target}!`);
+    },
+
+    Effect: async (message: Message): Promise<void> => {
+
+        let shouldBeLower = true;
+        let length = message.content.length;
+        let userMessage = message.content
+        let mockMessageArray = [...userMessage];
+
+        for (let i = 0; i < length; i++) {
+            if (userMessage[i].toUpperCase() !== userMessage[i].toLowerCase()) {
+                if (shouldBeLower) {
+                    mockMessageArray[i] = userMessage[i].toLowerCase();
+                } else {
+                    mockMessageArray[i] = userMessage[i].toUpperCase();
+                }
+                shouldBeLower = !shouldBeLower;
+            }
+        }
+        let mockMessage = mockMessageArray.join('');
+
+        await message.delete();
+        console.log(`${message.author.username} (${message.author.id}) tried to send the message "${message.content}"`
+            + ` in ${message.channel}, but they are being mocked!`);
+
+        await message.channel.send(`${message.author} says "${mockMessage}"`);
     }
 };
