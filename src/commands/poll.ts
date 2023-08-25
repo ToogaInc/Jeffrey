@@ -21,11 +21,15 @@ export const Poll = {
         }
     },
     run: async (interaction: CommandInteraction): Promise<void> => {
+        if (!interaction.guild) { //Checks if the command is NOT done in a server
+            await interaction.reply('This command can only be done in a server.');
+            return;
+        }
         const questionString = interaction.options.get('question')?.value;
 
         if (!questionString || typeof questionString !== 'string') return;
 
-        if (questionString.length > 256) {
+        if (questionString.length > 256) {//char limit 
             interaction.reply(`Question is too long. (max 256 char.)`);
         }
 
@@ -36,7 +40,7 @@ export const Poll = {
                 choices.push(choice);
             }
         }
-        if (choices.length === 0) {
+        if (choices.length === 0) {//No choices by user = Yes and No
             choices.push('Yes');
             choices.push('No');
         }
@@ -48,7 +52,7 @@ export const Poll = {
                 iconURL: interaction.user.displayAvatarURL()
             })
             .addFields(
-                { name: ' ', value: '** **' }
+                { name: ' ', value: '** **' }//Discord embed spacing to look nicer
             );
         for (let i = 0; i < choices.length; i++) {
             embed.addFields(
@@ -56,21 +60,26 @@ export const Poll = {
             )
             if (i + 1 < choices.length) {
                 embed.addFields(
-                    { name: ' ', value: '** **' },
+                    { name: ' ', value: '** **' },//more spacing
                 )
             }
         };
 
-        await interaction.channel!.send({ embeds: [embed] }).then(async embedMessage => {
-            interaction.reply({ content: 'Poll created!', ephemeral: true });
-            for (let i = 0; i < choices.length; i++) {
-                try {
-                    await embedMessage.react(`${numberEmojis[i]}`);
-                }
-                catch {
-                    console.log('error reacting');
-                }
-            }
-        });
+try {
+    const embedMessage = await interaction.channel!.send({ embeds: [embed] }); //send created embed
+    interaction.reply({ content: 'Poll created!', ephemeral: true });
+
+    // React to the embed with emojis
+    for (let i = 0; i < choices.length; i++) {
+        try {
+            await embedMessage.react(`${numberEmojis[i]}`);
+        } catch {
+            console.log('ERROR: Could not react with emoji.');
+        }
+    }
+} catch {
+    console.log(`ERROR: Could not send embed in ${interaction.channelId}`);
+}
+
     }
 };
