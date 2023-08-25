@@ -48,30 +48,38 @@ export const Mock = {
         mockTargets.add(target.id);
         await interaction.reply(`Sure thing, I will begin mocking ${target}!`);
     },
-
-    Effect: async (message: Message): Promise<void> => {
-
-        let shouldBeLower = true;
-        let length = message.content.length;
-        let userMessage = message.content
-        let mockMessageArray = [...userMessage];
-
+    effect: async (message: Message): Promise<void> => {
+        let shouldBeLower = true; // Whether the character should be made lowercase (set to true), or uppercase (set to false).
+        let length = message.content.length; // Length of the user's message
+        let userMessage = message.content; // Original user message
+        let mockMessage = ""; // The resulting mocked message
+    
+        // Loop through each character in the user's message
         for (let i = 0; i < length; i++) {
+            // Check if the character is a letter (excluding non-alphabetic characters)
             if (userMessage[i].toUpperCase() !== userMessage[i].toLowerCase()) {
                 if (shouldBeLower) {
-                    mockMessageArray[i] = userMessage[i].toLowerCase();
+                    mockMessage += userMessage[i].toLowerCase(); // Make it lowercase
                 } else {
-                    mockMessageArray[i] = userMessage[i].toUpperCase();
+                    mockMessage += userMessage[i].toUpperCase(); // Make it uppercase
                 }
-                shouldBeLower = !shouldBeLower;
+                shouldBeLower = !shouldBeLower; // Toggle the case for the next character
             }
         }
-        let mockMessage = mockMessageArray.join('');
-
-        await message.delete();
-        console.log(`${message.author.username} (${message.author.id}) tried to send the message "${message.content}"`
-            + ` in ${message.channel}, but they are being mocked!`);
-
-        await message.channel.send(`${message.author} says "${mockMessage}"`);
+    
+        // Attempt to delete the original message
+        try {
+            await message.delete();
+            console.log(`${message.author.username} (${message.author.id}) tried to send the message "${message.content}" in ${message.channel}, but they are being mocked!`);
+        } catch {
+            console.log(`ERROR: could not delete ${message.author.username} (${message.author.id}) message in ${message.channel}`);
+        }
+    
+        // Attempt to send the mocked message
+        try {
+            await message.channel.send(`${message.author} says "${mockMessage}"`);
+        } catch {
+            console.log(`ERROR: could not send message "${mockMessage}" in ${message.channel}`);
+        }
     }
 };

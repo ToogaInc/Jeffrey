@@ -79,7 +79,7 @@ client.on('messageCreate', async (message) => {
   if (!message.channel.isTextBased()) return;
 
   if (mockTargets.has(message.author.id)) {
-    await Mock.Effect(message);
+    await Mock.effect(message);
   }
 });
 
