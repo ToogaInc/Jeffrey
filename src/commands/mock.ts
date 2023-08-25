@@ -73,6 +73,7 @@ export const Mock = {
             console.log(`${message.author.username} (${message.author.id}) tried to send the message "${message.content}" in ${message.channel}, but they are being mocked!`);
         } catch {
             console.log(`ERROR: could not delete ${message.author.username} (${message.author.id}) message in ${message.channel}`);
+            return;
         }
     
         // Attempt to send the mocked message
@@ -80,6 +81,7 @@ export const Mock = {
             await message.channel.send(`${message.author} says "${mockMessage}"`);
         } catch {
             console.log(`ERROR: could not send message "${mockMessage}" in ${message.channel}`);
+            return;
         }
     }
 };
