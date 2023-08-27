@@ -61,7 +61,6 @@ client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
 
   const { commandName } = interaction;
-  const userID = interaction.user.id;
 
   if (commandName === 'ping') {
     await Ping.run(interaction);
