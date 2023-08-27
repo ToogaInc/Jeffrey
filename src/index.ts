@@ -8,7 +8,7 @@ import {
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Routes, GatewayIntentBits } from 'discord-api-types/v9';
-
+import { Sequelize } from 'sequelize';
 
 
 config();
@@ -16,6 +16,13 @@ config();
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
 const guildID = process.env.GUILD_ID;
+
+const sequelize = new Sequelize('database', 'user', 'password', {
+  host: 'localhost',
+  dialect: 'sqlite',
+  logging: true,
+  storage: 'JeffreyDB',
+});
 
 const intents = [
   GatewayIntentBits.Guilds,
