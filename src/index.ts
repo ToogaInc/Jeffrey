@@ -57,18 +57,12 @@ async function main() {
   }
 }
 
-
-export const mockTargets = new Set();
-
-const cooldown = new Map<string, Map<string, number>>();
-const cooldownTime = 5000;
-
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
 
   const { commandName } = interaction;
   const userID = interaction.user.id;
-  
+
   if (commandName === 'ping') {
     await Ping.run(interaction);
   }
@@ -82,5 +76,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 
 });
+
+export const mockTargets = new Set();
 
 main();
