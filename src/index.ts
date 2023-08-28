@@ -5,8 +5,6 @@ import {
   ClientOptions,
   REST,
   Routes,
-  GatewayIntentBits,
-  Routes,
   GatewayIntentBits
 } from 'discord.js';
 import { Ping } from './commands/ping';
@@ -22,8 +20,6 @@ const cooldownTime = 5000;
 
 export const mockTargets = new Set();
 
-export const mockTargets = new Set();
-
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
 const guildID = process.env.GUILD_ID;
@@ -31,10 +27,7 @@ const guildID = process.env.GUILD_ID;
 const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMembers,
-  GatewayIntentBits.GuildMembers,
   GatewayIntentBits.GuildMessages,
-  GatewayIntentBits.MessageContent,
-]
   GatewayIntentBits.MessageContent,
 ]
 
