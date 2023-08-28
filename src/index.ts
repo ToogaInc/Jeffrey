@@ -17,8 +17,6 @@ config();
 const cooldown = new Map<string, Map<string, number>>();
 const cooldownTime = 5000;
 
-export const mockTargets = new Set();
-
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
 const guildID = process.env.GUILD_ID;
@@ -67,8 +65,6 @@ async function main() {
 }
 Poll.addChoiceOptions();
 
-export const mockTargets = new Set();
-
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
 
@@ -114,5 +110,6 @@ client.on('messageCreate', async (message) => {
     await Mock.effect(message);
   }
 });
+export const mockTargets = new Set();
 
 main();
