@@ -13,14 +13,18 @@ import { Cat } from './commands/cat';
 
 config();
 
+export const mockTargets = new Set();
+
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
 const guildID = process.env.GUILD_ID;
 
 const intents = [
   GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMembers,
   GatewayIntentBits.GuildMessages,
-];
+  GatewayIntentBits.MessageContent,
+]
 
 const options: ClientOptions = {
   intents: intents,
@@ -73,9 +77,15 @@ client.on('interactionCreate', async (interaction) => {
   if (commandName === 'cat') {
     await Cat.run(interaction);
   }
-
 });
 
-export const mockTargets = new Set();
+client.on('messageCreate', async (message) => {
+  if (!message.inGuild) return;
+  if (!message.channel.isTextBased()) return;
+
+  if (mockTargets.has(message.author.id)) {
+    await Mock.effect(message);
+  }
+});
 
 main();
