@@ -11,8 +11,6 @@ import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
 
-
-
 config();
 
 const cooldown = new Map<string, Map<string, number>>();
@@ -48,7 +46,6 @@ const rest = new REST({ version: '10' }).setToken(token!);
 async function main() {
   try {
     console.log('Started refreshing application (/) commands.');
-    console.log('Started refreshing application (/) commands.');
 
       await rest.put(
           Routes.applicationGuildCommands(clientID!, guildID!),
@@ -62,9 +59,7 @@ async function main() {
       );
 
     console.log('Successfully reloaded application (/) commands.');
-    console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
-    console.error(error);
     console.error(error);
   }
 }
