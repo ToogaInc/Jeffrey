@@ -10,7 +10,8 @@ import {
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
-import { Sequelize } from 'sequelize';
+import { DB } from './JeffreyDB';
+import { Balance } from './commands/balance';
 
 config();
 
@@ -22,13 +23,6 @@ export const mockTargets = new Set();
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
 const guildID = process.env.GUILD_ID;
-
-const sequelize = new Sequelize('database', 'user', 'password', {
-  host: 'localhost',
-  dialect: 'sqlite',
-  logging: true,
-  storage: 'JeffreyDB',
-});
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -47,6 +41,8 @@ client.login(token);
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user!.tag}`);
+  DB.test();
+  DB.sync();
 });
 
 const rest = new REST({ version: '10' }).setToken(token!);
@@ -55,16 +51,17 @@ async function main() {
   try {
     console.log('Started refreshing application (/) commands.');
 
-      await rest.put(
-          Routes.applicationGuildCommands(clientID!, guildID!),
-          {
-              body: [
-                  Ping.info.toJSON(),
-                  Mock.info.toJSON(),
-                  Cat.info.toJSON()
-              ]
-          }
-      );
+    await rest.put(
+      Routes.applicationGuildCommands(clientID!, guildID!),
+      {
+        body: [
+          Ping.info.toJSON(),
+          Mock.info.toJSON(),
+          Cat.info.toJSON(),
+          Balance.info.toJSON()
+        ]
+      }
+    );
 
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
@@ -103,6 +100,9 @@ client.on('interactionCreate', async (interaction) => {
   }
   if (commandName === 'cat') {
     await Cat.run(interaction);
+  }
+  if (commandName === 'balance') {
+    await Balance.run(interaction);
   }
 });
 
