@@ -13,6 +13,9 @@ import { Cat } from './commands/cat';
 
 config();
 
+const cooldown = new Map<string, Map<string, number>>();
+const cooldownTime = 5000;
+
 export const mockTargets = new Set();
 
 const token = process.env.BOT_TOKEN;
@@ -44,16 +47,16 @@ async function main() {
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(
-      Routes.applicationGuildCommands(clientID!, guildID!),
-      {
-        body: [
-          Ping.info.toJSON(),
-          Mock.info.toJSON(),
-          Cat.info.toJSON()
-        ]
-      }
-    );
+      await rest.put(
+          Routes.applicationGuildCommands(clientID!, guildID!),
+          {
+              body: [
+                  Ping.info.toJSON(),
+                  Mock.info.toJSON(),
+                  Cat.info.toJSON()
+              ]
+          }
+      );
 
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
@@ -65,6 +68,22 @@ client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
 
   const { commandName } = interaction;
+  const userID = interaction.user.id;
+
+  if (!cooldown.has(commandName)) {
+    cooldown.set(commandName, new Map<string, number>());
+  }
+  const cooldownMap = cooldown.get(commandName)!;
+
+  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now()) {
+    const cooldownRemaining = (cooldownMap.get(userID)! - Date.now()) / 1000;
+    await interaction.reply(`Please wait ${cooldownRemaining.toFixed(1)} seconds.`);
+    return;
+  }
+  cooldownMap.set(userID, Date.now() + cooldownTime);
+
+  console.log(`user ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
+    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt}`);
 
   if (commandName === 'ping') {
     await Ping.run(interaction);
