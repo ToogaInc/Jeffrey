@@ -14,8 +14,6 @@ import { Poll } from './commands/poll';
 
 config();
 
-export const mockTargets = new Set();
-
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
 const guildID = process.env.GUILD_ID;
@@ -60,7 +58,6 @@ async function main() {
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
-    console.error(error);
   }
 }
 Poll.addChoiceOptions();
@@ -83,6 +80,9 @@ client.on('interactionCreate', async (interaction) => {
   if (commandName === 'cat') {
     await Cat.run(interaction);
   }
+  if (commandName === 'poll') {
+    Poll.run(interaction);
+  }
 });
 
 client.on('messageCreate', async (message) => {
@@ -91,9 +91,6 @@ client.on('messageCreate', async (message) => {
 
   if (mockTargets.has(message.author.id)) {
     await Mock.effect(message);
-  }
-  if (commandName === 'poll') {
-    Poll.run(interaction);
   }
 });
 
