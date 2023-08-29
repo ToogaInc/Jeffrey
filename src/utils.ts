@@ -11,3 +11,12 @@
         "9⃣",
         "🔟"
     ];
+
+    export async function rng(min: number, max: number): Promise<number> {
+        const randomDecimal = Math.random();
+
+        const range = max - min + 1;
+        const randomNumber = Math.floor(randomDecimal * range) + min;
+        
+        return randomNumber
+    }

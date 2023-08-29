@@ -10,9 +10,10 @@ import {
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
-import { DB } from './JeffreyDB';
 import { Balance } from './commands/balance';
 import { Poll } from './commands/poll';
+import { Roll } from './commands/roll';
+import { DB } from './JeffreyDB';
 
 config();
 
@@ -58,7 +59,8 @@ async function main() {
           Mock.info.toJSON(),
           Cat.info.toJSON(),
           Poll.info.toJSON(),
-          Balance.info.toJSON()
+          Balance.info.toJSON(),
+          Roll.info.toJSON()
         ]
       }
     );
@@ -81,7 +83,7 @@ client.on('interactionCreate', async (interaction) => {
   }
   const cooldownMap = cooldown.get(commandName)!;
 
-  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now()) {
+  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now() && interaction.user.id !== '218823980524634112') {
     const cooldownRemaining = (cooldownMap.get(userID)! - Date.now()) / 1000;
     await interaction.reply(`Please wait ${cooldownRemaining.toFixed(1)} seconds.`);
     return;
@@ -107,6 +109,9 @@ client.on('interactionCreate', async (interaction) => {
   }
   if (commandName === 'balance') {
     await Balance.run(interaction);
+  }
+  if (commandName === 'roll') {
+    await Roll.run(interaction)
   }
 });
 

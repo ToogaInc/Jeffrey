@@ -6,6 +6,20 @@ export const sequelize = new Sequelize('database', 'user', 'password', {
     storage: 'JeffreyDB',
     logging: false,
 });
+
+export class Users extends Model {}
+Users.init({
+    userid: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true,
+    },
+    username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+}, { sequelize });
+
 export class UserWallets extends Model {
     declare userid: string;
     declare balance: number;
@@ -13,14 +27,40 @@ export class UserWallets extends Model {
 UserWallets.init({
     userid: {
         type: DataTypes.STRING,
-        unique: true
+        allowNull: false,
+        references: {
+            model: Users,
+            key: 'userid',
+        },
     },
     balance: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
     }
-}, { sequelize });
+}, { sequelize }
+);
+
+export class GachaInvs extends Model {}
+
+GachaInvs.init({
+    userid: {
+        type: DataTypes.STRING,
+        references: {
+            model: Users,
+            key: 'userid',
+        },
+    },
+    gachas: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    amt: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+}, {sequelize}
+);
 
 export const DB = {
     test: async (): Promise<void> => {
@@ -39,4 +79,4 @@ export const DB = {
             console.log('UserWallets not synced');
         }
     }
-}
+};

@@ -56,7 +56,7 @@ export const Balance = {
             target = member;
         }
         try {
-            const [userInstance, created] = await UserWallets.findOrCreate({ where: { userid: target.id } });
+            const [userInstance] = await UserWallets.findOrCreate({ where: { userid: target.id } });
 
             if (userInstance) {
                 console.log(`target found or created: ${userInstance.userid}`);
