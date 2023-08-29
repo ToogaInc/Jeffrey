@@ -4,6 +4,7 @@ export const sequelize = new Sequelize('database', 'user', 'password', {
     host: 'localhost',
     dialect: 'sqlite',
     storage: 'JeffreyDB',
+    logging: false,
 });
 export class UserWallets extends Model {
     declare userid: string;
