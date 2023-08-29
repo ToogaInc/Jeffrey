@@ -12,13 +12,12 @@ import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
 import { DB } from './JeffreyDB';
 import { Balance } from './commands/balance';
+import { Poll } from './commands/poll';
 
 config();
 
 const cooldown = new Map<string, Map<string, number>>();
 const cooldownTime = 5000;
-
-export const mockTargets = new Set();
 
 const token = process.env.BOT_TOKEN;
 const clientID = process.env.CLIENT_ID;
@@ -58,6 +57,7 @@ async function main() {
           Ping.info.toJSON(),
           Mock.info.toJSON(),
           Cat.info.toJSON(),
+          Poll.info.toJSON(),
           Balance.info.toJSON()
         ]
       }
@@ -68,6 +68,7 @@ async function main() {
     console.error(error);
   }
 }
+Poll.addChoiceOptions();
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
@@ -101,6 +102,9 @@ client.on('interactionCreate', async (interaction) => {
   if (commandName === 'cat') {
     await Cat.run(interaction);
   }
+  if (commandName === 'poll') {
+    Poll.run(interaction);
+  }
   if (commandName === 'balance') {
     await Balance.run(interaction);
   }
@@ -114,5 +118,6 @@ client.on('messageCreate', async (message) => {
     await Mock.effect(message);
   }
 });
+export const mockTargets = new Set();
 
 main();
