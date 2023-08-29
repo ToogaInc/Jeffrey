@@ -54,8 +54,8 @@ export const Roll = {
             return;
         }
         const rarity = JeffreyGotchaURLs[raritySelect];
-        const chooseGacha = await rng(0, rarity.length);
+        const chooseGacha = await rng(0, rarity.length - 1);
         const gacha = rarity[chooseGacha];
-        await interaction.reply(`you pulled ${gacha}!`); 
+        await interaction.reply(`you pulled a **${raritySelect}** rarity Jeffrey! ${gacha}`); 
     }
 };
