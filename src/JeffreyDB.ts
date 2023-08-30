@@ -82,10 +82,16 @@ export const DB = {
     },
     sync: async (): Promise<void> => {
         try {
+            await Users.sync();
+            console.log(`UsersDB synced`);
+
             await UserWallets.sync();
             console.log('UserWallets synced');
+
+            await GachaInvs.sync();
+            console.log(`GachaInvs synced`)
         } catch {
-            console.log('UserWallets not synced');
+            console.log('Failed to sync table(s)');
         }
     }
 };

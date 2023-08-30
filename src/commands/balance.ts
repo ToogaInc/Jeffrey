@@ -1,5 +1,7 @@
 import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { checkUsers, checkBalance, changeBalance } from '../DBUtils';
+import { checkUsers, checkBalance, changeBalance, addUsers, checkUserWalletsUser, addUserWalletsUser } from '../DBUtils';
+import { replyWithEmbed } from '../utils';
+import { start } from 'repl';
 
 export const Balance = {
     info: new SlashCommandBuilder()
@@ -25,7 +27,8 @@ export const Balance = {
         const add = (interaction.options as any).getInteger('add');
         let target;
         let higherUp = false;
-        let targetBalance
+        let targetBalance;
+        let startingBalance;
 
         const role = [
             getRole.find(role => role.name.toLowerCase() === 'moderator'),
@@ -59,12 +62,20 @@ export const Balance = {
 
         try {
             const userInUsers = await checkUsers(target.id);
+            if(!userInUsers){
+                await addUsers(target.id, target.username); 
+            }
+            const userInWallet = await checkUserWalletsUser(target.id);
+            if(!userInWallet){
+                await addUserWalletsUser(target.id);
+            }
         } catch {
             console.log(`ERROR: Could not run checkUsers on ${target.id}`)
         }
 
         if (add !== null) {
             try {
+                startingBalance = await checkBalance(target.id);
                 await changeBalance(target.id, add);
             } catch {
                 console.log(`ERROR: Could not run changeBalance command for ${target.id} + (${add})`)
@@ -72,7 +83,8 @@ export const Balance = {
         }
         
         try {
-            const targetBalance = await checkBalance(target.id);
+            targetBalance = await checkBalance(target.id);
+            console.log(targetBalance)
             if(!targetBalance){
                 console.log(`ERROR: ${target.id}'s balance is NULL or undefined.`);
                 return;
@@ -84,12 +96,19 @@ export const Balance = {
 
         const embed = new EmbedBuilder()
             .setAuthor({ name: `${target.displayName}'s Wallet`, iconURL: target.displayAvatarURL() })
-            .addFields({ name: ' ', value: `Balance: ${targetBalance!.balance}` });
-            
+            .addFields({ name: ' ', value: `Balance: ${targetBalance}` });
+
         try {
-            await interaction.reply({ embeds: [embed] });
+            if(!add){
+            await replyWithEmbed(embed, interaction);
+            }if (add >= 0){
+                await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance} + ${add} = ${targetBalance})`);
+            }if (add < 0){
+                await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance} - ${add * -1} = ${targetBalance})`);
+            }
+            await interaction.channel!.send({ embeds: [embed] });
         } catch {
-            console.log(`Failed to send embed in ${interaction.channelId}`);
+            console.log(`ERROR: Failed to send reply and/or embed in ${interaction.channelId}`);
         }
     }
 };
