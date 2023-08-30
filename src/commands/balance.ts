@@ -1,7 +1,6 @@
 import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { checkUsers, checkBalance, changeBalance, addUsers, checkUserWalletsUser, addUserWalletsUser } from '../DBUtils';
 import { replyWithEmbed } from '../utils';
-import { start } from 'repl';
 
 export const Balance = {
     info: new SlashCommandBuilder()
@@ -101,14 +100,17 @@ export const Balance = {
         try {
             if(!add){
             await replyWithEmbed(embed, interaction);
-            }if (add >= 0){
+            }
+            if (add >= 0){
                 await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance} + ${add} = ${targetBalance})`);
-            }if (add < 0){
+            }
+            if (add < 0){
                 await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance} - ${add * -1} = ${targetBalance})`);
             }
             await interaction.channel!.send({ embeds: [embed] });
         } catch {
             console.log(`ERROR: Failed to send reply and/or embed in ${interaction.channelId}`);
+            return;
         }
     }
 };
