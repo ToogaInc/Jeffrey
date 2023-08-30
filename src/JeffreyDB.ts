@@ -7,7 +7,10 @@ export const sequelize = new Sequelize('database', 'user', 'password', {
     logging: false,
 });
 
-export class Users extends Model {}
+export class Users extends Model {
+    declare userid: string;
+    declare username: string;
+}
 Users.init({
     userid: {
         type: DataTypes.STRING,
@@ -40,8 +43,13 @@ UserWallets.init({
     }
 }, { sequelize }
 );
+Users.hasOne(UserWallets, { foreignKey: 'userid', sourceKey: 'userid' });
 
-export class GachaInvs extends Model {}
+export class GachaInvs extends Model {
+    declare userid: string;
+    declare gachas: string;
+    declare amt: number;
+}
 
 GachaInvs.init({
     userid: {
@@ -59,8 +67,9 @@ GachaInvs.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-}, {sequelize}
+}, { sequelize }
 );
+Users.hasMany(GachaInvs, { foreignKey: 'userid', sourceKey: 'userid' });
 
 export const DB = {
     test: async (): Promise<void> => {

@@ -1,5 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { UserWallets } from '../JeffreyDB';
+import { checkUsers, checkBalance, changeBalance } from '../DBUtils';
 
 export const Balance = {
     info: new SlashCommandBuilder()
@@ -21,11 +21,11 @@ export const Balance = {
         }
         const userID = interaction.user.id;
         const member = interaction.options.getUser('member');
-        let target;
-        let higherUp = false;
-        let checkBalance;
         const getRole = interaction.guild.roles.cache;
         const add = (interaction.options as any).getInteger('add');
+        let target;
+        let higherUp = false;
+        let targetBalance
 
         const role = [
             getRole.find(role => role.name.toLowerCase() === 'moderator'),
@@ -45,35 +45,38 @@ export const Balance = {
                 higherUp = true;
             }
         }
+
         if (!higherUp && add) {
             await interaction.reply('Only officer+ can modify member balances!');
             return;
         }
+
         if (!member || member.id === userID) {
             target = interaction.user;
-        }
-        else {
+        } else {
             target = member;
         }
-        try {
-            const [userInstance] = await UserWallets.findOrCreate({ where: { userid: target.id } });
 
-            if (userInstance) {
-                console.log(`target found or created: ${userInstance.userid}`);
-            }
+        try {
+            const userInUsers = await checkUsers(target.id);
         } catch {
-            console.log("could not findorcreate target");
+            console.log(`ERROR: Could not run checkUsers on ${target.id}`)
         }
+
         if (add !== null) {
             try {
-                const addBalance = await UserWallets.increment({ balance: add }, { where: { userid: target.id } });
-                // * Model.increment({ answer: 42, tries: -1}, { where: { foo: 'bar' } });
+                await changeBalance(target.id, add);
             } catch {
-                console.log(`ERROR: could not increment ${target.id}`)
+                console.log(`ERROR: Could not run changeBalance command for ${target.id} + (${add})`)
             }
         }
+        
         try {
-            checkBalance = await UserWallets.findOne({ where: { userid: target.id } });
+            const targetBalance = await checkBalance(target.id);
+            if(!targetBalance){
+                console.log(`ERROR: ${target.id}'s balance is NULL or undefined.`);
+                return;
+            }
         } catch {
             console.log('error checking balance');
             return;
@@ -81,10 +84,10 @@ export const Balance = {
 
         const embed = new EmbedBuilder()
             .setAuthor({ name: `${target.displayName}'s Wallet`, iconURL: target.displayAvatarURL() })
-            .addFields({ name: ' ', value: `Balance: ${checkBalance!.balance}` }
-            );
+            .addFields({ name: ' ', value: `Balance: ${targetBalance!.balance}` });
+            
         try {
-            const embedMessage = await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         } catch {
             console.log(`Failed to send embed in ${interaction.channelId}`);
         }
