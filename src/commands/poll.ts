@@ -65,21 +65,21 @@ export const Poll = {
             }
         };
 
-try {
-    const embedMessage = await interaction.channel!.send({ embeds: [embed] }); //send created embed
-    interaction.reply({ content: 'Poll created!', ephemeral: true });
-
-    // React to the embed with emojis
-    for (let i = 0; i < choices.length; i++) {
         try {
-            await embedMessage.react(`${numberEmojis[i]}`);
+            const embedMessage = await interaction.channel!.send({ embeds: [embed] }); //send created embed
+            interaction.reply({ content: 'Poll created!', ephemeral: true });
+
+            // React to the embed with emojis
+            for (let i = 0; i < choices.length; i++) {
+                try {
+                    await embedMessage.react(`${numberEmojis[i]}`);
+                } catch {
+                    console.log('ERROR: Could not react with emoji.');
+                }
+            }
         } catch {
-            console.log('ERROR: Could not react with emoji.');
+            console.log(`ERROR: Could not send embed in ${interaction.channelId}`);
         }
-    }
-} catch {
-    console.log(`ERROR: Could not send embed in ${interaction.channelId}`);
-}
 
     }
 };

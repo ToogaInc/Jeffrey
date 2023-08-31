@@ -66,6 +66,7 @@ GachaInvs.init({
     amt: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 1,
     },
 }, { sequelize }
 );
@@ -86,10 +87,10 @@ export const DB = {
             console.log(`UsersDB synced`);
 
             await UserWallets.sync();
-            console.log('UserWallets synced');
+            console.log(`UserWallets synced`);
 
             await GachaInvs.sync();
-            console.log(`GachaInvs synced`)
+            console.log(`GachaInvs synced`);
         } catch {
             console.log('Failed to sync table(s)');
         }

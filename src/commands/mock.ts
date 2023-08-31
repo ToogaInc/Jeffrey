@@ -57,7 +57,7 @@ export const Mock = {
         let length = message.content.length;
         let userMessage = message.content;
         let mockMessage = "";
-    
+
         for (let i = 0; i < length; i++) {
             // Check if the character is a letter (excluding non-alphabetic characters)
             if (userMessage[i].toUpperCase() !== userMessage[i].toLowerCase()) {
@@ -69,7 +69,7 @@ export const Mock = {
                 shouldBeLower = !shouldBeLower;
             }
         }
-    
+
         // Attempt to delete the original message
         try {
             await message.delete();
@@ -78,7 +78,7 @@ export const Mock = {
             console.log(`ERROR: could not delete ${message.author.username} (${message.author.id}) message in ${message.channel}`);
             return;
         }
-    
+
         // Attempt to send the mocked message
         try {
             await message.channel.send(`${message.author} says "${mockMessage}"`);

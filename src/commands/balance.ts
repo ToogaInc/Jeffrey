@@ -61,11 +61,11 @@ export const Balance = {
 
         try {
             const userInUsers = await checkUsers(target.id);
-            if(!userInUsers){
-                await addUsers(target.id, target.username); 
+            if (!userInUsers) {
+                await addUsers(target.id, target.username);
             }
             const userInWallet = await checkUserWalletsUser(target.id);
-            if(!userInWallet){
+            if (!userInWallet) {
                 await addUserWalletsUser(target.id);
             }
         } catch {
@@ -80,11 +80,11 @@ export const Balance = {
                 console.log(`ERROR: Could not run changeBalance command for ${target.id} + (${add})`)
             }
         }
-        
+
         try {
             targetBalance = await checkBalance(target.id);
             console.log(targetBalance)
-            if(!targetBalance){
+            if (!targetBalance) {
                 console.log(`ERROR: ${target.id}'s balance is NULL or undefined.`);
                 return;
             }
@@ -98,13 +98,13 @@ export const Balance = {
             .addFields({ name: ' ', value: `Balance: ${targetBalance}` });
 
         try {
-            if(!add){
-            await replyWithEmbed(embed, interaction);
+            if (!add) {
+                await replyWithEmbed(embed, interaction);
             }
-            if (add >= 0){
+            if (add >= 0) {
                 await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance} + ${add} = ${targetBalance})`);
             }
-            if (add < 0){
+            if (add < 0) {
                 await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance} - ${add * -1} = ${targetBalance})`);
             }
             await interaction.channel!.send({ embeds: [embed] });
