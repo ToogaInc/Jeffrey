@@ -1,6 +1,6 @@
-import { Model } from "sequelize";
 import { Users, UserWallets, GachaInvs } from "./JeffreyDB"
 
+//check if 'userid' is in the Users table
 export async function checkUsers(userID: string): Promise<boolean | null> {
 
     try {
@@ -20,6 +20,7 @@ export async function checkUsers(userID: string): Promise<boolean | null> {
     return null;
 }
 
+// adds 'userid' and 'username' to the Users table
 export async function addUsers(userID: string, username: string): Promise<void> {
     try {
         const user = await Users.create({ userid: userID, username: username });
@@ -29,6 +30,7 @@ export async function addUsers(userID: string, username: string): Promise<void> 
     }
 }
 
+//checks balance for 'userid' in UserWallets 
 export async function checkBalance(userID: string): Promise<number | null> {
     try {
         const userBalance = await UserWallets.findOne({ where: { userid: userID } });
@@ -42,6 +44,11 @@ export async function checkBalance(userID: string): Promise<number | null> {
     return null;
 }
 
+/**
+ * change 'userid' balance by 'add' (can be positive or negative)
+ * @param userID
+ * @param add 
+ */
 export async function changeBalance(userID: string, add: number): Promise<void> {
     try {
         const addBalance = await UserWallets.increment({ balance: add }, { where: { userid: userID } });
@@ -51,6 +58,7 @@ export async function changeBalance(userID: string, add: number): Promise<void> 
     }
 }
 
+//checks if 'userid' is in UserWallets
 export async function checkUserWalletsUser(userID: string): Promise<boolean | null> {
     try {
         const user = await UserWallets.findOne({ where: { userid: userID } });
@@ -67,6 +75,7 @@ export async function checkUserWalletsUser(userID: string): Promise<boolean | nu
     return null;
 }
 
+//Adds 'userid' to UserWallets (balance defaults to 0)
 export async function addUserWalletsUser(userID: string): Promise<void> {
     try {
         const user = await UserWallets.create({ where: { userid: userID } });
@@ -76,6 +85,7 @@ export async function addUserWalletsUser(userID: string): Promise<void> {
     }
 }
 
+//checks if 'userid' has the given 'gachas' (gachaURL) yet. 
 export async function checkGachaInv(userID: string, gachaURL: string): Promise<boolean | null> {
     try {
         const user = await GachaInvs.findOne({ where: { userid: userID, gachas: gachaURL } });
@@ -92,6 +102,7 @@ export async function checkGachaInv(userID: string, gachaURL: string): Promise<b
     }
 }
 
+//adds 'userid' and 'gachas'(gachaURL) to the GachaInvs table.
 export async function addGacha(userID: string, gachaURL: string): Promise<void> {
     try {
         console.log(`${userID} and ${gachaURL}`);
@@ -103,6 +114,12 @@ export async function addGacha(userID: string, gachaURL: string): Promise<void> 
     }
 }
 
+/**
+ * 
+ * @param userID - userid
+ * @param gachaURL - gachas
+ * increases 'amt' by 1 (level it up).
+ */
 export async function gachaLvlUp(userID: string, gachaURL: string): Promise<void> {
     try {
         const gacha = await GachaInvs.increment({ amt: 1 }, { where: { userid: userID, gachas: gachaURL } });
@@ -112,6 +129,12 @@ export async function gachaLvlUp(userID: string, gachaURL: string): Promise<void
     }
 }
 
+/**
+ * 
+ * @param userID - userid
+ * @param gachaURL - gachas
+ * @returns - 'amt' (lvl), at  'userid', 'gachas'.
+ */
 export async function checkGachaLevel(userID: string, gachaURL: string): Promise<number | null>{
     try{ 
         const level = await GachaInvs.findOne({where: {userid: userID, gachas: gachaURL}});

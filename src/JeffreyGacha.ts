@@ -1,3 +1,4 @@
+//Object containing the 4 rarities, which are arrays of all the gacha URL pictures from imgur.
 export const JeffreyGachaURLs = {
     Common: [
         'https://imgur.com/iSHcsOd.png',
@@ -95,7 +96,7 @@ export const JeffreyGachaURLs = {
     ]
     
 }
-
+//Object containing the Names and Descriptions of all the legendary gachas
 const LegendaryInfo: { [key: string]: { Name: string; Description: string } } = {
     RadiantJeffrey: {
         Name: 'Radiant Jeffrey',
@@ -147,6 +148,11 @@ const LegendaryInfo: { [key: string]: { Name: string; Description: string } } = 
     }
 }
 
+/**
+ *
+ * @param gacha - takes a legendary gacha image URL 
+ * @returns - gachaInfo, contains legendary info (Name and Description)
+ */
 export async function displayLegendary(gacha: string): Promise<string[] | null> { 
     for(let i = 0; i < 12; i++){
         if(JeffreyGachaURLs.Legendary[i].link === gacha){
