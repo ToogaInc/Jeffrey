@@ -7,11 +7,11 @@ export const sequelize = new Sequelize('database', 'user', 'password', {
     logging: false,
 });
 
-export class Users extends Model {
+export class User extends Model {
     declare userid: string;
     declare username: string;
 }
-Users.init({
+User.init({
     userid: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -23,16 +23,16 @@ Users.init({
     },
 }, { sequelize });
 
-export class UserWallets extends Model {
+export class Wallet extends Model {
     declare userid: string;
     declare balance: number;
 }
-UserWallets.init({
+Wallet.init({
     userid: {
         type: DataTypes.STRING,
         allowNull: false,
         references: {
-            model: Users,
+            model: User,
             key: 'userid',
         },
     },
@@ -41,21 +41,20 @@ UserWallets.init({
         allowNull: false,
         defaultValue: 0,
     }
-}, { sequelize }
-);
-Users.hasOne(UserWallets, { foreignKey: 'userid', sourceKey: 'userid' });
+}, { sequelize });
+User.hasOne(Wallet, { foreignKey: 'userid', sourceKey: 'userid' });
 
-export class GachaInvs extends Model {
+export class GachaInv extends Model {
     declare userid: string;
     declare gachas: string;
     declare amt: number;
 }
 
-GachaInvs.init({
+GachaInv.init({
     userid: {
         type: DataTypes.STRING,
         references: {
-            model: Users,
+            model: User,
             key: 'userid',
         },
     },
@@ -70,8 +69,16 @@ GachaInvs.init({
     },
 }, { sequelize }
 );
-Users.hasMany(GachaInvs, { foreignKey: 'userid', sourceKey: 'userid' });
+User.hasMany(GachaInv, { foreignKey: 'userid', sourceKey: 'userid' });
 
+/**
+ * test: 
+ * Attempts to establish a connection to the database file which stores all the tables.
+ * 
+ * sync:
+ * Tries to sync all database tables with the database file, 
+ * which allows it to keep the information previously stored in their respective tables.
+ */
 export const DB = {
     test: async (): Promise<void> => {
         try {
@@ -83,13 +90,13 @@ export const DB = {
     },
     sync: async (): Promise<void> => {
         try {
-            await Users.sync();
+            await User.sync();
             console.log(`UsersDB synced`);
 
-            await UserWallets.sync();
+            await Wallet.sync();
             console.log(`UserWallets synced`);
 
-            await GachaInvs.sync();
+            await GachaInv.sync();
             console.log(`GachaInvs synced`);
         } catch {
             console.log('Failed to sync table(s)');

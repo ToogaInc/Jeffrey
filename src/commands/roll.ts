@@ -1,13 +1,12 @@
 import { JeffreyGachaURLs, displayLegendary } from "../JeffreyGacha";
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, InviteTargetType } from "discord.js";
+import { SlashCommandBuilder, CommandInteraction, EmbedBuilder } from "discord.js";
 import { replyWithEmbed, rng } from '../utils';
 import {
     addGacha,
-    addUserWalletsUser,
-    changeBalance,
+    findOrAddUserWallet,
+    AddOrSubtractBalance,
     checkBalance,
     checkGachaInv,
-    checkUserWalletsUser,
     gachaLvlUp,
     checkGachaLevel
 } from "../DBUtils";
@@ -22,35 +21,27 @@ export const Roll = {
             await interaction.reply('this command can only be done in a server');
             return;
         }
-        let embed;
-        let currentBalance;
-        const userID = interaction.user.id;
-        try {
-            const user = await checkUserWalletsUser(userID);
-            if (!user) {
-                await addUserWalletsUser(userID);
-            }
-        } catch {
-            console.log("could not findorcreate target");
-        }
+        let embed: EmbedBuilder;
+        let currentBalance: number;
 
-        try {
-            currentBalance = await checkBalance(userID);
-        } catch {
-            console.log(`ERROR: Could not chekc balance for ${userID}`);
-        }
+        const price: number = 5;
+        const userID = interaction.user.id;
+
+        await findOrAddUserWallet(userID);
+
+        currentBalance = await checkBalance(userID);
 
         if (!currentBalance) {
             console.log(`${userID}'s currentBalance is NULL or undefined`);
             return;
         }
 
-        if (currentBalance < 5) {
+        if (currentBalance < price) {
             await interaction.reply('not enough JeffreyCoins!');
             return;
         } else {
-            await changeBalance(userID, -5);
-            currentBalance -= 5;
+            await AddOrSubtractBalance(userID, -price);
+            currentBalance -= price;
         }
 
         const rndm = await rng(0, 100);
@@ -82,45 +73,46 @@ export const Roll = {
         } else {
             await gachaLvlUp(userID, gacha);
         }
-
         if (raritySelect !== 'Legendary') {
             embed = new EmbedBuilder()
                 .setTitle(`You pulled a **${displayRarity}** Jeffrey!`)
                 .setAuthor({ name: `${interaction.user.displayName}` })
                 .setImage(gacha);
 
-        } else if (raritySelect === 'Legendary') {
+        } else {
+            (raritySelect === 'Legendary')
             const legendaryInfo = await displayLegendary(gacha);
+
             if (!legendaryInfo || !legendaryInfo[0] || !legendaryInfo[1]) {
                 console.log(`ERROR: could not find legendaryInfo`);
-                return;
+                await interaction.reply('Sorry the command could not be completed, please contact a developer.')
             } else {
-                console.log(`${gacha} rarity for ${userID} is somehow neither legendary NOR !legendary. (${rarity} ${raritySelect})`)
+                embed = new EmbedBuilder()
+                    .setTitle('YOU PULLED A LEGENDARY JEFFREY!!!')
+                    .setAuthor({ name: `${interaction.user.displayName}` })
+                    .setImage(gacha)
+                    .addFields({ name: `${legendaryInfo[0]}`, value: `${legendaryInfo[1]}` });
             }
-            embed = new EmbedBuilder()
-                .setTitle('YOU PULLED A LEGENDARY JEFFREY!!!')
-                .setAuthor({ name: `${interaction.user.displayName}` })
-                .setImage(gacha)
-                .addFields({ name: `${legendaryInfo[0]}`, value: `${legendaryInfo[1]}` });
         }
-        if (!embed) {
+        if (!embed!) {
             console.log(`ERROR: Embed is undefined!`);
-            return;
+            await interaction.reply('Sorry the command could not be completed, please contact a developer.')
         }
         const gachaLevel = await checkGachaLevel(userID, gacha);
         let starArray = '';
         if (!gachaLevel) {
             console.log(`gachaLevel is ${gachaLevel} (NULL)`);
-            return;
+            await interaction.reply('Sorry the command could not be completed, please contact a developer.')
         }
         for (let i = 0; i < gachaLevel; i++) {
             starArray += '⭐';
         }
-        embed.setDescription(starArray);
+        embed!.setDescription(starArray);
         try {
-            await replyWithEmbed(embed, interaction);
+            await replyWithEmbed(embed!, interaction);
         } catch {
             console.log(`ERROR: could not reply with embed in ${interaction.channelId}`);
+            return;
         }
     }
 };

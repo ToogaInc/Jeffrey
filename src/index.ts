@@ -5,7 +5,8 @@ import {
   ClientOptions,
   REST,
   Routes,
-  GatewayIntentBits
+  GatewayIntentBits,
+  ChatInputCommandInteraction
 } from 'discord.js';
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
@@ -105,10 +106,10 @@ client.on('interactionCreate', async (interaction) => {
     await Cat.run(interaction);
   }
   if (commandName === 'poll') {
-    Poll.run(interaction);
+    Poll.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'balance') {
-    await Balance.run(interaction);
+    await Balance.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'roll') {
     await Roll.run(interaction)

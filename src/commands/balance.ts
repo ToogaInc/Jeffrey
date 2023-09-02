@@ -1,5 +1,5 @@
-import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { checkUsers, checkBalance, changeBalance, addUsers, checkUserWalletsUser, addUserWalletsUser } from '../DBUtils';
+import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
+import { checkUser, checkBalance, AddOrSubtractBalance, addUser, findOrAddUserWallet } from '../DBUtils';
 import { replyWithEmbed } from '../utils';
 
 export const Balance = {
@@ -15,21 +15,22 @@ export const Balance = {
                 .setDescription('Add to balance, negative number to subtract. (officer+ only)')
                 .setRequired(false)),
 
-    run: async (interaction: CommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
         if (!interaction.guild) {
             await interaction.reply('This command can only be done in a server.');
             return;
         }
         const userID = interaction.user.id;
         const member = interaction.options.getUser('member');
-        const getRole = interaction.guild.roles.cache;
-        const add = (interaction.options as any).getInteger('add');
+        const add = interaction.options.getInteger('add');
         
-        let target;
-        let higherUp = false;
-        let targetBalance;
-        let startingBalance;
+        let target: User;
+        let targetBalance: number;
+        let startingBalance: number;
 
+        let higherUp = false;
+
+        const getRole = interaction.guild.roles.cache;
         //need at least one of these roles to use the 'add' option
         const role = [
             getRole.find(role => role.name.toLowerCase() === 'moderator'),
@@ -65,41 +66,24 @@ export const Balance = {
         }
 
         //checks for target in Users, otherwise adds them
-        //checks for target in UserWallets, otherwise adds them
-        try {
-            const userInUsers = await checkUsers(target.id);
+            const userInUsers = await checkUser(target.id);
             if (!userInUsers) {
-                await addUsers(target.id, target.username);
+                await addUser(target.id, target.username);
             }
-            const userInWallet = await checkUserWalletsUser(target.id);
-            if (!userInWallet) {
-                await addUserWalletsUser(target.id);
-            }
-        } catch {
-            console.log(`ERROR: Could not run checkUsers on ${target.id}`)
-        }
+            const userInWallet = await findOrAddUserWallet(target.id);
 
         //checks targets current balance, then adds 'add' to it (can be negative)
         if (add !== null) {
-            try {
                 startingBalance = await checkBalance(target.id);
-                await changeBalance(target.id, add);
-            } catch {
-                console.log(`ERROR: Could not run changeBalance command for ${target.id} + (${add})`)
-            }
+                await AddOrSubtractBalance(target.id, add);
         }
 
         //checks targets balance
-        try {
             targetBalance = await checkBalance(target.id);
             if (!targetBalance) {
                 console.log(`ERROR: ${target.id}'s balance is NULL or undefined.`);
                 return;
             }
-        } catch {
-            console.log('error checking balance');
-            return;
-        }
 
         const embed = new EmbedBuilder()
             .setAuthor({ name: `${target.displayName}'s Wallet`, iconURL: target.displayAvatarURL() })
@@ -111,11 +95,11 @@ export const Balance = {
             if (!add) {
                 await replyWithEmbed(embed, interaction);
             }
-            if (add >= 0) {
-                await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance} + ${add} = ${targetBalance})`);
+            if (add && add >= 0) {
+                await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance!} + ${add} = ${targetBalance})`);
             }
-            if (add < 0) {
-                await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance} - ${add * -1} = ${targetBalance})`);
+            if (add && add < 0) {
+                await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance!} - ${add * -1} = ${targetBalance})`);
             }
             await interaction.channel!.send({ embeds: [embed] });
         } catch {

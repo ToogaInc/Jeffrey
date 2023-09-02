@@ -1,150 +1,142 @@
-import { Users, UserWallets, GachaInvs } from "./JeffreyDB"
-
-//check if 'userid' is in the Users table
-export async function checkUsers(userID: string): Promise<boolean | null> {
-
-    try {
-        const user = await Users.findOne({ where: { userid: userID } });
-
-        if (user) {
-            console.log(`user ${user.userid} found in Users`);
-            return true;
-        }
-        else {
-            console.log(`user ${userID} NOT found in Users`);
-            return false;
-        }
-    } catch {
-        console.log(`ERROR: could not check for ${userID} in Users table `);
-    }
-    return null;
-}
-
-// adds 'userid' and 'username' to the Users table
-export async function addUsers(userID: string, username: string): Promise<void> {
-    try {
-        const user = await Users.create({ userid: userID, username: username });
-        console.log(`added ${userID} to Users`);
-    } catch {
-        console.log(`ERROR: could not add ${userID} to Users`);
-    }
-}
-
-//checks balance for 'userid' in UserWallets 
-export async function checkBalance(userID: string): Promise<number | null> {
-    try {
-        const userBalance = await UserWallets.findOne({ where: { userid: userID } });
-        if (userBalance) {
-            console.log(`Balance for ${userID} is ${userBalance.balance}`);
-            return userBalance.balance;
-        }
-    } catch {
-        console.log(`ERROR: Could not check balance for ${userID}`);
-    }
-    return null;
-}
+import { User, Wallet, GachaInv } from "./JeffreyDB"
 
 /**
- * change 'userid' balance by 'add' (can be positive or negative)
- * @param userID
- * @param add 
- */
-export async function changeBalance(userID: string, add: number): Promise<void> {
-    try {
-        const addBalance = await UserWallets.increment({ balance: add }, { where: { userid: userID } });
-        console.log(`${userID}'s wallet has been changed by: ${add}`);
-    } catch {
-        console.log(`ERROR: could not increment ${userID}`);
-    }
-}
-
-//checks if 'userid' is in UserWallets
-export async function checkUserWalletsUser(userID: string): Promise<boolean | null> {
-    try {
-        const user = await UserWallets.findOne({ where: { userid: userID } });
-        if (user) {
-            console.log(`${userID} found in UserWallets`);
-            return true;
-        } else {
-            console.log(`${userID} NOT found in UserWallets`);
-            return false;
-        }
-    } catch {
-        console.log(`ERROR: Could not search for ${userID} in UserWallets`);
-    }
-    return null;
-}
-
-//Adds 'userid' to UserWallets (balance defaults to 0)
-export async function addUserWalletsUser(userID: string): Promise<void> {
-    try {
-        const user = await UserWallets.create({ where: { userid: userID } });
-        console.log(`${userID} added to UserWallets`);
-    } catch {
-        console.log(`ERROR: Could not add ${userID} to UserWallets`);
-    }
-}
-
-//checks if 'userid' has the given 'gachas' (gachaURL) yet. 
-export async function checkGachaInv(userID: string, gachaURL: string): Promise<boolean | null> {
-    try {
-        const user = await GachaInvs.findOne({ where: { userid: userID, gachas: gachaURL } });
-        if (user) {
-            console.log(`found ${userID} in GachaInvs`);
-            return true;
-        } else {
-            console.log(`did NOT find ${userID} in GachaInvs`);
-            return false;
-        }
-    } catch (error) {
-        console.log(`ERROR: Could not check for ${userID} in GachaInvs`, error);
-        return null;
-    }
-}
-
-//adds 'userid' and 'gachas'(gachaURL) to the GachaInvs table.
-export async function addGacha(userID: string, gachaURL: string): Promise<void> {
-    try {
-        console.log(`${userID} and ${gachaURL}`);
-        const user = await GachaInvs.create({ userid: userID, gachas: gachaURL, amt: 1 });
-        console.log(`${userID} added to GachaInvs`);
-    } catch (err){
-        console.error(`ERROR: Could not add ${userID} to GachaInvs`);
-        throw err;
-    }
-}
-
-/**
+ * Checks if the given userID is in the "User" table.
  * 
- * @param userID - userid
- * @param gachaURL - gachas
- * increases 'amt' by 1 (level it up).
+ * @param {string} userID - Users Discord ID
+ * @returns {Promise<boolean>}- True or False (whether or not their userID is in "User" table)
+ */
+export async function checkUser(userID: string): Promise<boolean> {
+
+    const user = await User.findOne({ where: { userid: userID } });
+    if (user) {
+        console.log(`user ${user.userid} found in Users`);
+        return true;
+    } else {
+        console.log(`user ${userID} NOT found in Users`);
+        return false;
+    }
+}
+
+/**
+ * Adds a row in the "User" table, which contains a users discord ID and discord Username.
+ * 
+ * @param {string} userID - Users Discord ID
+ * @param {string} username - Users Discord Username(not displayname)
+ */
+export async function addUser(userID: string, username: string): Promise<void> {
+
+    await User.create({ userid: userID, username: username });
+    console.log(`added ${userID} to Users`);
+}
+
+/**
+ * Searches for the 'balance' associated the given users Discord ID.
+ * 
+ * If no balance was found, it calls another function to create a new row in "Wallet"-
+ * -which contains the users Discord ID, and 'balance' defaults to 0.
+ * 
+ * (balance is used in a monetary context $$$)
+ * 
+ * @param {string} userID - Users Discord ID
+ * @returns {Promise<number>} -  Returns the users current balance in "Wallet" table.
+ *                               Returns 0 if no number was found (default value).
+ */
+export async function checkBalance(userID: string): Promise<number> {
+    const userBalance = await Wallet.findOne({ where: { userid: userID } });
+    if (userBalance) {
+        console.log(`${userID} has a balance of ${userBalance.balance}`);
+        return userBalance.balance;
+    } else {
+        await findOrAddUserWallet(userID);
+        return 0;
+    }
+}
+
+/**
+ * Add or Subtract the 'balance' associated with the users Discord ID-
+ * -in the "Wallet" table by 'amount'.
+ * 
+ * @param userID - Users Discord ID
+ * @param amount - Positive or Negative integer to Add or Subtract 'balance' by
+ */
+export async function AddOrSubtractBalance(userID: string, amount: number): Promise<void> {
+    await Wallet.increment({ balance: amount }, { where: { userid: userID } });
+    console.log(`${userID}'s wallet has been changed by: ${amount}`);
+}
+
+/**
+ * Checks if there is a row in the "Wallet" table that contains the users Discord ID-
+ * -creates one if it is not found.
+ * 
+ * @param {string} userID - Users Discord ID
+ */
+export async function findOrAddUserWallet(userID: string): Promise<void> {
+    await Wallet.findOrCreate({ where: { userid: userID } });
+    console.log(`Found or created Wallet for ${userID}`);
+}
+
+/**
+ * Checks for a row in GachaInv that contains both 'userID' and 'gachaURL'.
+ * Looking for if the user has previously aquired this gacha.(ie: if its a duplicate)
+ * 
+ * @param {string} userID - Users Discord ID
+ * @param {string} gachaURL - URL associated with a specific gacha item (picture).
+ * @returns {Promise<boolean>} - True or False (whether or not userID is in the same row as gachaURL in "GachaInv" table)
+ */
+export async function checkGachaInv(userID: string, gachaURL: string): Promise<boolean> {
+    const user = await GachaInv.findOne({ where: { userid: userID, gachas: gachaURL } });
+    if (user) {
+        console.log(`found ${userID} in GachaInvs`);
+        return true;
+    } else {
+        console.log(`did NOT find ${userID} in GachaInvs`);
+        return false;
+    }
+}
+
+/**
+ * Adds a row in "GachaInv" table containing the users Disord ID, their new gacha picture, and setting amt to 1.
+ * This function must be called only when we know this row does not already exist (ie: call the checkGachaInv function before this).
+ * 
+ * @param userID - Users Discord ID
+ * @param gachaURL - URL associated with a specific gacha item (picture).
+ */
+export async function addGacha(userID: string, gachaURL: string): Promise<void> {
+    await GachaInv.create({ userid: userID, gachas: gachaURL, amt: 1 });
+    console.log(`${userID} added to GachaInvs with their new ${gachaURL}`);
+}
+
+/**
+ * Increases the amount ('amt') column in the row that contains both userID and gachaURL.
+ * Function should only be called when it is confirmed that a row exists with 'userID' and 'gachaURL' (ie: the 'checkGachaInv' function).
+ *  
+ * @example 
+ *         (Wallet table)
+ *      table starts with: | userID: 8743284 | gachas: https:/sajdjioafh.png | amt: 1 |
+ *          table becomes: | userID: 8743284 | gachas: https:/sajdjioafh.png | amt: 2 |
+ * 
+ * @param userID - Users Discord ID
+ * @param gachaURL - URL associated with a specific gacha item (picture).
  */
 export async function gachaLvlUp(userID: string, gachaURL: string): Promise<void> {
-    try {
-        const gacha = await GachaInvs.increment({ amt: 1 }, { where: { userid: userID, gachas: gachaURL } });
-        console.log(`increased ${gachaURL}'s level by 1 for ${userID}!`);
-    } catch {
-        console.log(`ERROR: could not increase ${gachaURL}'s level by 1 for ${userID}.`);
-    }
+    await GachaInv.increment({ amt: 1 }, { where: { userid: userID, gachas: gachaURL } });
+    console.log(`increased ${gachaURL}'s level by 1 for ${userID}!`);
 }
 
 /**
+ * Checks the 'amt' number column that is in the row of the users Discord ID and Gacha URL/ID. 
  * 
- * @param userID - userid
- * @param gachaURL - gachas
- * @returns - 'amt' (lvl), at  'userid', 'gachas'.
+ * @param {string} userID - Users Discord ID
+ * @param {string} gachaURL - URL associated with a specific gacha item (picture).
+ * @returns {Promise<number>} - The 'amt' column in the row containing 'userID' and 'gachaURL'
+ *                              Returns 0 if no 'amt' was found.(default value is 1, so 0 is impossible for 'amt')
  */
-export async function checkGachaLevel(userID: string, gachaURL: string): Promise<number | null>{
-    try{ 
-        const level = await GachaInvs.findOne({where: {userid: userID, gachas: gachaURL}});
-        if(level){
+export async function checkGachaLevel(userID: string, gachaURL: string): Promise<number> {
+    const level = await GachaInv.findOne({ where: { userid: userID, gachas: gachaURL } });
+    if (level) {
         return level.amt;
-        }else{
-            return null;
-        }
-    }catch{
-        console.log(`ERROR: could not check ${userID}'s GachaInv for ${gachaURL}'s level.`);
+    } else {
+        return 0;
     }
-    return null;
 }
