@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Model } from 'sequelize';
+import { Sequelize, DataTypes, Model, IntegerDataType } from 'sequelize';
 
 export const sequelize = new Sequelize('database', 'user', 'password', {
     host: 'localhost',
@@ -7,33 +7,41 @@ export const sequelize = new Sequelize('database', 'user', 'password', {
     logging: false,
 });
 
-export class Users extends Model {
-    declare userid: string;
-    declare username: string;
+export class User extends Model {
+    declare id: string;
+    declare name: string;
 }
-Users.init({
-    userid: {
+User.init({
+    id: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
     },
-    username: {
+    name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
 }, { sequelize });
 
-export class UserWallets extends Model {
+export class Wallet extends Model {
+    declare id: string;
     declare userid: string;
     declare balance: number;
 }
-UserWallets.init({
+Wallet.init({
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false,
+        autoIncrement: true,
+    },
     userid: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
         references: {
-            model: Users,
-            key: 'userid',
+            model: User,
+            key: 'id',
         },
     },
     balance: {
@@ -43,20 +51,29 @@ UserWallets.init({
     }
 }, { sequelize }
 );
-Users.hasOne(UserWallets, { foreignKey: 'userid', sourceKey: 'userid' });
+User.hasOne(Wallet, { foreignKey: 'userid', sourceKey: 'id' });
 
-export class GachaInvs extends Model {
+export class GachaInv extends Model {
+    declare id: string;
     declare userid: string;
     declare gachas: string;
     declare amt: number;
 }
 
-GachaInvs.init({
+GachaInv.init({
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false,
+        autoIncrement: true,
+    },
     userid: {
         type: DataTypes.STRING,
+        unique: false,
+        allowNull: false,
         references: {
-            model: Users,
-            key: 'userid',
+            model: User,
+            key: 'id',
         },
     },
     gachas: {
@@ -70,7 +87,43 @@ GachaInvs.init({
     },
 }, { sequelize }
 );
-Users.hasMany(GachaInvs, { foreignKey: 'userid', sourceKey: 'userid' });
+User.hasMany(GachaInv, { foreignKey: 'userid', sourceKey: 'id' });
+
+export class DailyWheel extends Model {
+    declare id: string;
+    declare userid: string;
+    declare spins: number;
+    declare createdAt: string;
+}
+
+DailyWheel.init({
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false,
+        autoIncrement: true,
+        defaultValue: 1,
+    },
+    userid: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: false,
+        references: {
+            model: User,
+            key: 'id',
+        },
+    },
+    spins: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 5,
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+    },
+}, { sequelize }
+);
 
 export const DB = {
     test: async (): Promise<void> => {
@@ -83,14 +136,17 @@ export const DB = {
     },
     sync: async (): Promise<void> => {
         try {
-            await Users.sync();
+            await User.sync();
             console.log(`UsersDB synced`);
 
-            await UserWallets.sync();
+            await Wallet.sync();
             console.log(`UserWallets synced`);
 
-            await GachaInvs.sync();
+            await GachaInv.sync();
             console.log(`GachaInvs synced`);
+
+            await DailyWheel.sync();
+            console.log(`DailyWheel synced`);
         } catch {
             console.log('Failed to sync table(s)');
         }

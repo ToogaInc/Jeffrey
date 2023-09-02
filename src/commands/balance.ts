@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { checkUsers, checkBalance, changeBalance, addUsers, checkUserWalletsUser, addUserWalletsUser } from '../DBUtils';
 import { replyWithEmbed } from '../utils';
 
@@ -15,7 +15,7 @@ export const Balance = {
                 .setDescription('Add to balance, negative number to subtract. (officer+ only)')
                 .setRequired(false)),
 
-    run: async (interaction: CommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
         if (!interaction.guild) {
             await interaction.reply('This command can only be done in a server.');
             return;
@@ -23,18 +23,16 @@ export const Balance = {
         const userID = interaction.user.id;
         const member = interaction.options.getUser('member');
         const getRole = interaction.guild.roles.cache;
-        const add = (interaction.options as any).getInteger('add');
-        
+        const add = interaction.options.getInteger('add');
+
         let target;
         let higherUp = false;
-        let targetBalance;
-        let startingBalance;
 
         //need at least one of these roles to use the 'add' option
         const role = [
             getRole.find(role => role.name.toLowerCase() === 'moderator'),
-            getRole.find(role => role.name.toLocaleLowerCase() === 'officer'),
-            getRole.find(role => role.name.toLocaleLowerCase() === 'head raid leader')
+            getRole.find(role => role.name.toLowerCase() === 'officer'),
+            getRole.find(role => role.name.toLowerCase() === 'head raid leader')
         ];
 
         const length = role.length;
@@ -66,38 +64,29 @@ export const Balance = {
 
         //checks for target in Users, otherwise adds them
         //checks for target in UserWallets, otherwise adds them
-        try {
-            const userInUsers = await checkUsers(target.id);
-            if (!userInUsers) {
-                await addUsers(target.id, target.username);
-            }
-            const userInWallet = await checkUserWalletsUser(target.id);
-            if (!userInWallet) {
-                await addUserWalletsUser(target.id);
-            }
-        } catch {
-            console.log(`ERROR: Could not run checkUsers on ${target.id}`)
+        const userInUsers = await checkUsers(target.id);
+        if (!userInUsers) {
+            await addUsers(target.id, target.username);
+        }
+        const userInWallet = await checkUserWalletsUser(target.id);
+        if (!userInWallet) {
+            await addUserWalletsUser(target.id);
         }
 
+        let startingBalance;
         //checks targets current balance, then adds 'add' to it (can be negative)
         if (add !== null) {
-            try {
-                startingBalance = await checkBalance(target.id);
-                await changeBalance(target.id, add);
-            } catch {
-                console.log(`ERROR: Could not run changeBalance command for ${target.id} + (${add})`)
+            startingBalance = await checkBalance(target.id);
+            if (!startingBalance && startingBalance !== 0) {
+                startingBalance = 0;
             }
+            await changeBalance(target.id, add);
         }
 
         //checks targets balance
-        try {
-            targetBalance = await checkBalance(target.id);
-            if (!targetBalance) {
-                console.log(`ERROR: ${target.id}'s balance is NULL or undefined.`);
-                return;
-            }
-        } catch {
-            console.log('error checking balance');
+        const targetBalance = await checkBalance(target.id);
+        if (!targetBalance && targetBalance !== 0) {
+            console.log(`ERROR: ${target.id}'s balance is NULL or undefined.`);
             return;
         }
 
@@ -105,22 +94,20 @@ export const Balance = {
             .setAuthor({ name: `${target.displayName}'s Wallet`, iconURL: target.displayAvatarURL() })
             .addFields({ name: ' ', value: `Balance: ${targetBalance}` });
 
-            //if no 'add' was specified, reply with embed of balance
-            //otherwise, reply with the balance change, then send embed
-        try {
-            if (!add) {
-                await replyWithEmbed(embed, interaction);
-            }
-            if (add >= 0) {
-                await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance} + ${add} = ${targetBalance})`);
-            }
-            if (add < 0) {
-                await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance} - ${add * -1} = ${targetBalance})`);
-            }
+        //if no 'add' was specified, reply with embed of balance
+        //otherwise, reply with the balance change, then send embed
+        if (!add) {
+            await replyWithEmbed(embed, interaction);
+        } else if (add > 0) {
+            await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance!} + ${add} = ${targetBalance})`);
             await interaction.channel!.send({ embeds: [embed] });
-        } catch {
-            console.log(`ERROR: Failed to send reply and/or embed in ${interaction.channelId}`);
+        } else if (add < 0) {
+            await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance!} - ${add * -1} = ${targetBalance})`);
+            await interaction.channel!.send({ embeds: [embed] });
+        } else {
+            console.log(`ERROR: Could not send msg embed in ${interaction.channelId}`);
             return;
         }
+
     }
 };

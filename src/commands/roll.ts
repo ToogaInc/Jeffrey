@@ -1,5 +1,5 @@
 import { JeffreyGachaURLs, displayLegendary } from "../JeffreyGacha";
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, InviteTargetType } from "discord.js";
+import { SlashCommandBuilder, CommandInteraction, EmbedBuilder } from "discord.js";
 import { replyWithEmbed, rng } from '../utils';
 import {
     addGacha,
@@ -9,7 +9,9 @@ import {
     checkGachaInv,
     checkUserWalletsUser,
     gachaLvlUp,
-    checkGachaLevel
+    checkGachaLevel,
+    addUsers,
+    checkUsers
 } from "../DBUtils";
 
 export const Roll = {
@@ -23,24 +25,25 @@ export const Roll = {
             return;
         }
         let embed;
-        let currentBalance;
         const userID = interaction.user.id;
-        try {
-            const user = await checkUserWalletsUser(userID);
-            if (!user) {
-                await addUserWalletsUser(userID);
-            }
-        } catch {
-            console.log("could not findorcreate target");
+        let currentBalance;
+
+
+
+        const userInUsers = await checkUsers(userID);
+        if (!userInUsers) {
+            await addUsers(userID, interaction.user.username);
         }
 
-        try {
-            currentBalance = await checkBalance(userID);
-        } catch {
-            console.log(`ERROR: Could not chekc balance for ${userID}`);
+        const user = await checkUserWalletsUser(userID);
+        if (!user) {
+            await addUserWalletsUser(userID);
         }
 
-        if (!currentBalance) {
+        currentBalance = await checkBalance(userID);
+        console.log(currentBalance);
+
+        if (!currentBalance && currentBalance !== 0) {
             console.log(`${userID}'s currentBalance is NULL or undefined`);
             return;
         }
@@ -50,7 +53,6 @@ export const Roll = {
             return;
         } else {
             await changeBalance(userID, -5);
-            currentBalance -= 5;
         }
 
         const rndm = await rng(0, 100);
@@ -117,10 +119,7 @@ export const Roll = {
             starArray += '⭐';
         }
         embed.setDescription(starArray);
-        try {
-            await replyWithEmbed(embed, interaction);
-        } catch {
-            console.log(`ERROR: could not reply with embed in ${interaction.channelId}`);
-        }
+
+        await replyWithEmbed(embed, interaction);
     }
 };
