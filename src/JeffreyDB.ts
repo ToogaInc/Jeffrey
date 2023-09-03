@@ -1,12 +1,14 @@
 import { Sequelize, DataTypes, Model } from 'sequelize';
 
-export const sequelize = new Sequelize('database', 'user', 'password', {
-    host: 'localhost',
+export const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: 'JeffreyDB',
+    storage: './JeffreyDB.sqlite',
     logging: false,
 });
 
+// Creates the "User" table with:
+// @example 
+// | userid:'667951424704872450' | username: 'jeffreyhassalide' | 
 export class User extends Model {
     declare userid: string;
     declare username: string;
@@ -23,6 +25,9 @@ User.init({
     },
 }, { sequelize });
 
+// Creates the "Wallet" table with
+// @example 
+// | userid: 667951424704872450 | balance: 10 |
 export class Wallet extends Model {
     declare userid: string;
     declare balance: number;
@@ -44,12 +49,14 @@ Wallet.init({
 }, { sequelize });
 User.hasOne(Wallet, { foreignKey: 'userid', sourceKey: 'userid' });
 
+// Creates the "Wallet" table with
+// @example 
+// | userid: 667951424704872450 | gachas: https:/gachaexample.png | amt: 2 | 
 export class GachaInv extends Model {
     declare userid: string;
     declare gachas: string;
     declare amt: number;
 }
-
 GachaInv.init({
     userid: {
         type: DataTypes.STRING,
@@ -71,15 +78,12 @@ GachaInv.init({
 );
 User.hasMany(GachaInv, { foreignKey: 'userid', sourceKey: 'userid' });
 
-/**
- * test: 
- * Attempts to establish a connection to the database file which stores all the tables.
- * 
- * sync:
- * Tries to sync all database tables with the database file, 
- * which allows it to keep the information previously stored in their respective tables.
- */
+// Contains'test' and 'sync'
 export const DB = {
+    /**
+     * test: 
+     * Checks if it has access to the database file
+     */
     test: async (): Promise<void> => {
         try {
             await sequelize.authenticate();
@@ -88,6 +92,11 @@ export const DB = {
             console.error('Unable to connect to the database:', error);
         }
     },
+/**
+ * sync:
+ * Tries to sync all database tables with the database file, 
+ * which allows it to build upon the information previously stored in their respective tables after bot resets.
+ */
     sync: async (): Promise<void> => {
         try {
             await User.sync();

@@ -2,13 +2,13 @@ import { JeffreyGachaURLs, displayLegendary } from "../JeffreyGacha";
 import { SlashCommandBuilder, CommandInteraction, EmbedBuilder } from "discord.js";
 import { replyWithEmbed, rng } from '../utils';
 import {
-    addGacha,
+    addNewGacha,
     findOrAddUserWallet,
     AddOrSubtractBalance,
     checkBalance,
-    checkGachaInv,
     gachaLvlUp,
-    checkGachaLevel
+    checkGachaLevel,
+    checkIfUserHasGachaInv
 } from "../DBUtils";
 
 export const Roll = {
@@ -31,8 +31,9 @@ export const Roll = {
 
         currentBalance = await checkBalance(userID);
 
-        if (!currentBalance) {
+        if (!currentBalance && currentBalance !== 0) {
             console.log(`${userID}'s currentBalance is NULL or undefined`);
+            interaction.reply('Failed to check balance, please contact a developer');
             return;
         }
 
@@ -59,17 +60,18 @@ export const Roll = {
             console.log('error choosing random rarity for Roll command');
             return;
         }
+
         const rarity = JeffreyGachaURLs[raritySelect];
         const chooseGacha = await rng(0, rarity.length - 1);
         const gachaObj = rarity[chooseGacha];
-        const gacha = (typeof gachaObj === 'string' ? gachaObj : gachaObj.link);
+        const gacha = gachaObj.link;
 
         const displayRarity = raritySelect.toUpperCase();
 
-        const gachaInv = await checkGachaInv(userID, gacha);
+        const gachaInv = await checkIfUserHasGachaInv(userID, gacha);
         if (!gachaInv) {
             console.log(gacha);
-            await addGacha(userID, gacha);
+            await addNewGacha(userID, gacha);
         } else {
             await gachaLvlUp(userID, gacha);
         }
@@ -80,7 +82,6 @@ export const Roll = {
                 .setImage(gacha);
 
         } else {
-            (raritySelect === 'Legendary')
             const legendaryInfo = await displayLegendary(gacha);
 
             if (!legendaryInfo || !legendaryInfo[0] || !legendaryInfo[1]) {

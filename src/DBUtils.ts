@@ -84,7 +84,7 @@ export async function findOrAddUserWallet(userID: string): Promise<void> {
  * @param {string} gachaURL - URL associated with a specific gacha item (picture).
  * @returns {Promise<boolean>} - True or False (whether or not userID is in the same row as gachaURL in "GachaInv" table)
  */
-export async function checkGachaInv(userID: string, gachaURL: string): Promise<boolean> {
+export async function checkIfUserHasGachaInv(userID: string, gachaURL: string): Promise<boolean> {
     const user = await GachaInv.findOne({ where: { userid: userID, gachas: gachaURL } });
     if (user) {
         console.log(`found ${userID} in GachaInvs`);
@@ -102,7 +102,7 @@ export async function checkGachaInv(userID: string, gachaURL: string): Promise<b
  * @param userID - Users Discord ID
  * @param gachaURL - URL associated with a specific gacha item (picture).
  */
-export async function addGacha(userID: string, gachaURL: string): Promise<void> {
+export async function addNewGacha(userID: string, gachaURL: string): Promise<void> {
     await GachaInv.create({ userid: userID, gachas: gachaURL, amt: 1 });
     console.log(`${userID} added to GachaInvs with their new ${gachaURL}`);
 }
