@@ -1,6 +1,6 @@
 import { CommandInteraction, EmbedBuilder } from 'discord.js';
 
-export const numberEmojis: string[] = [
+export const NUMBER_EMOJIS: string[] = [
     "1⃣",
     "2⃣",
     "3⃣",
@@ -12,7 +12,12 @@ export const numberEmojis: string[] = [
     "9⃣",
     "🔟"
 ];
-
+/**
+ * Chooses a random number between min and max
+ * @param min - the lowest possible number
+ * @param max - the highest possible number
+ * @returns - returns the random number
+ */
 export async function rng(min: number, max: number): Promise<number> {
     const randomDecimal = Math.random();
 
@@ -21,7 +26,12 @@ export async function rng(min: number, max: number): Promise<number> {
 
     return randomNumber
 }
-
+/**
+ * Replies to the command user with an embedded message.
+ * Embed will be constructed in command files.
+ * @param embed - Embed with desired information/fields
+ * @param interaction - The command interaction to reply to.
+ */
 export async function replyWithEmbed(embed: EmbedBuilder, interaction: CommandInteraction): Promise<void> {
     try {
         await interaction.reply({ embeds: [embed] });

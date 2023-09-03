@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { numberEmojis } from '../utils';
+import { NUMBER_EMOJIS } from '../utils';
 
 const MAX_CHOICES = 5;
 
@@ -21,13 +21,11 @@ export const Poll = {
         }
     },
     run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
-
-        //Checks if the command is NOT done in a server
-        if (!interaction.guild) {
+        if (!interaction.guild) { //Checks if the command is NOT done in a server
             await interaction.reply('This command can only be done in a server.');
             return;
         }
-        const questionString = interaction.options.getString('member');
+        const questionString = interaction.options.getString('question');
 
         if (!questionString) return;
 
@@ -43,7 +41,6 @@ export const Poll = {
                 choices.push(choice);
             }
         }
-
         //No choices by user = Yes and No
         if (choices.length === 0) {
             choices.push('Yes');
@@ -60,14 +57,17 @@ export const Poll = {
             //Discord embed spacing to look nicer
             .addFields(
                 { name: ' ', value: '** **' }
+                { name: ' ', value: '** **' }
             );
         for (let i = 0; i < choices.length; i++) {
             embed.addFields(
-                { name: ' ', value: `${numberEmojis[i]}  ${choices[i]}` },
+                { name: ' ', value: `${NUMBER_EMOJIS[i]}  ${choices[i]}` },
             )
             if (i + 1 < choices.length) {
                 //more spacing
+                //more spacing
                 embed.addFields(
+                    { name: ' ', value: '** **' },
                     { name: ' ', value: '** **' },
                 )
             }
@@ -76,12 +76,14 @@ export const Poll = {
         try {
             //send created embed
             const embedMessage = await interaction.channel!.send({ embeds: [embed] });
+            //send created embed
+            const embedMessage = await interaction.channel!.send({ embeds: [embed] });
             interaction.reply({ content: 'Poll created!', ephemeral: true });
 
             // React to the embed with emojis
             for (let i = 0; i < choices.length; i++) {
                 try {
-                    await embedMessage.react(`${numberEmojis[i]}`);
+                    await embedMessage.react(`${NUMBER_EMOJIS[i]}`);
                 } catch {
                     console.log('ERROR: Could not react with emoji.');
                 }

@@ -6,8 +6,6 @@ import {
   REST,
   Routes,
   GatewayIntentBits,
-  SlashCommandBuilder,
-  SlashCommandAssertions,
   ChatInputCommandInteraction
 } from 'discord.js';
 import { Ping } from './commands/ping';
@@ -113,6 +111,7 @@ client.on('interactionCreate', async (interaction) => {
     await Poll.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'balance') {
+    await Balance.run(interaction as ChatInputCommandInteraction);
     await Balance.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'roll') {
