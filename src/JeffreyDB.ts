@@ -49,7 +49,7 @@ Wallet.init({
 }, { sequelize });
 User.hasOne(Wallet, { foreignKey: 'userid', sourceKey: 'userid' });
 
-// Creates the "Wallet" table with
+// Creates the "GachaInv" table with
 // @example 
 // | userid: 667951424704872450 | gachas: https:/gachaexample.png | amt: 2 | 
 export class GachaInv extends Model {

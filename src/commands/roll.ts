@@ -86,7 +86,7 @@ export const Roll = {
 
             if (!legendaryInfo || !legendaryInfo[0] || !legendaryInfo[1]) {
                 console.log(`ERROR: could not find legendaryInfo`);
-                await interaction.reply('Sorry the command could not be completed, please contact a developer.')
+                await interaction.reply('Sorry the command could not be completed, please contact a developer.');
             } else {
                 embed = new EmbedBuilder()
                     .setTitle('YOU PULLED A LEGENDARY JEFFREY!!!')
