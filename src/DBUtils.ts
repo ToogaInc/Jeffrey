@@ -1,4 +1,4 @@
-import { User, Wallet, GachaInv } from "./JeffreyDB"
+import { User, Wallet, GachaInv, DailyWheel } from "./JeffreyDB"
 
 /**
  * Checks if the given userID is in the "User" table.
@@ -10,7 +10,7 @@ export async function checkUser(userID: string): Promise<boolean> {
 
     const user = await User.findOne({ where: { userid: userID } });
     if (user) {
-        console.log(`user ${user.userid} found in Users`);
+        console.log(`user ${user.id} found in Users`);
         return true;
     } else {
         console.log(`user ${userID} NOT found in Users`);
@@ -51,14 +51,14 @@ export async function checkBalance(userID: string): Promise<number> {
         await findOrAddUserWallet(userID);
         return 0;
     }
-}
+};
 
 /**
  * Add or Subtract the 'balance' associated with the users Discord ID-
  * -in the "Wallet" table by 'amount'.
  * 
- * @param userID - Users Discord ID
- * @param amount - Positive or Negative integer to Add or Subtract 'balance' by
+ * @param {string}userID - Users Discord ID
+ * @param {number}amount - Positive or Negative integer to Add or Subtract 'balance' by
  */
 export async function addOrSubtractBalance(userID: string, amount: number): Promise<void> {
     await Wallet.increment({ balance: amount }, { where: { userid: userID } });
@@ -99,8 +99,8 @@ export async function checkIfUserHasGachaInv(userID: string, gachaURL: string): 
  * Adds a row in "GachaInv" table containing the users Disord ID, their new gacha picture, and setting amt to 1.
  * This function must be called only when we know this row does not already exist (ie: call the checkGachaInv function before this).
  * 
- * @param userID - Users Discord ID
- * @param gachaURL - URL associated with a specific gacha item (picture).
+ * @param {string} userID - Users Discord ID
+ * @param {string} achaURL - URL associated with a specific gacha item (picture).
  */
 export async function addNewGacha(userID: string, gachaURL: string): Promise<void> {
     await GachaInv.create({ userid: userID, gachas: gachaURL, amt: 1 });
@@ -139,4 +139,32 @@ export async function checkGachaLevel(userID: string, gachaURL: string): Promise
     } else {
         return 0;
     }
-}
+};
+/**
+ * Checks if the users Discord ID is in the DailyWheel table,
+ * if not, create a new row with the userID 
+ * 
+ * @param {string} userID - Users Discord ID
+ */
+export async function findOrCreateDailyWheel(userID: string): Promise<void> {
+
+        await DailyWheel.findOrCreate({ where: { userid: userID } });
+        console.log(`${userID} found or created in DailyWheel`);
+};
+
+/**
+ * Checks how many spins are left for given userID (Discord ID),
+ * and when the wheel resets (every 24 hours)
+ * 
+ * @param {string} userID - Users Discord ID
+ * @returns {[number, Date]} - How many spins left, and when the users wheel will regain its available spins.
+ */
+export async function checkSpins(userID: string): Promise<[number, Date]> {
+
+        const wheel = await DailyWheel.findOne({ where: { userid: userID } });
+        const endTime = new Date(wheel!.createdAt);
+
+        endTime.setHours(endTime.getHours() + 24);
+
+        return [wheel!.spins, endTime];
+};

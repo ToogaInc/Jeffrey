@@ -1,3 +1,6 @@
+import { DailyWheel } from './JeffreyDB';
+import { rng } from './utils';
+
 
 type GachaURLType = {
     link: string;
@@ -104,8 +107,52 @@ export const JeffreyGachaURLs: { [key: string]: GachaURLType[] } = {
         { link: 'https://imgur.com/eTGaGLM.png', name: 'Lap-Cat Jeffrey', description: 'He\'s been know to peruse a lap or two.' },
         { link: 'https://imgur.com/7YdKWjS.png', name: 'GateKeeper Jeffrey', description: 'Come on Jeffrey, that\'s not very nice!' }
     ]
-    
 }
+
+export const WheelResults: { [key: string]: { Name: string; Description: string } } = {
+    OneCoin: {
+        Name: '1 Coin...',
+        Description: 'Wow thats lame...'
+    },
+    TenCoins: {
+        Name: '10 Coins',
+        Description: 'Hey, at least its something.'
+    },
+    TwentyFiveCoins: {
+        Name: '25 coins',
+        Description: 'Could be more, but not terrible!'
+    },
+    FiftyCoins: {
+        Name: '50 Coins',
+        Description: 'Solid spin!'
+    },
+    SixtyNineCoins: {
+        Name: '69 coins',
+        Description: 'Nice'
+    },
+    OneHundredCoins: {
+        Name: '100 coins!',
+        Description: 'One hundred? Thats TEN rolls if you did them individually! I wouldn\'t recommend that though.' 
+    },
+    OneFiftyCoins: {
+        Name: '150 coins!',
+        Description: 'Awesome! Perfect for TEN rolls (if you do them five at a time)!'
+    },
+    FourTwentyCoins: {
+        Name: '420 coins',
+        Description: 'Blaze it'
+    },
+    Legendary: {
+        Name: 'LEGENDARY!?',
+        Description: 'You got a legendary from the wheel? I didn\'t even know that was possible!'
+    },
+    Jackpot: {
+        Name: ' A JACKPOT!!!!!!!!!',
+        Description: 'OMG. Ok im starting to think this creator sucks at balancing.'
+    }
+
+}
+
 /**
  * Takes a Legendary gacha URL and returns an array containing the link(url), name and description of that gacha.
  * 
@@ -121,11 +168,82 @@ export async function displayLegendary(gacha: string): Promise<string[] | null> 
                 legendary[i].name,
                 legendary[i].description
             ];
-            console.log(gachaInfo);
             return gachaInfo;
         }
     }
     return null;
 }
 
+export async function spinWheel(userID: string): Promise<[string[], number] | null> {
+    const rndm = await rng(0, 1000);
+    let reward: string[] = [];
+    let coins: number = 0;
+
+    try{
+        const spin = await DailyWheel.increment({ spins: -1 }, {where: { userid: userID } });
+        console.log(`${userID} has used one of their spins!`);
+    }catch(err){
+        console.error(err);
+    }
+
+    if(rndm < 20){
+        reward = [
+            WheelResults.OneCoin.Name,
+            WheelResults.OneCoin.Description
+        ];
+        coins = 1;
+    }else if(rndm >= 20 && rndm < 150 ){
+        reward = [
+            WheelResults.TenCoins.Name,
+            WheelResults.TenCoins.Description
+        ];
+        coins = 10;
+    }else if(rndm >= 150 && rndm < 400){
+        reward = [
+            WheelResults.TwentyFiveCoins.Name,
+            WheelResults.TwentyFiveCoins.Description
+        ];
+        coins = 25;
+    }else if(rndm >= 400 && rndm < 650 ){
+        reward = [
+            WheelResults.FiftyCoins.Name,
+            WheelResults.FiftyCoins.Description
+        ];
+        coins = 50;
+    }else if(rndm >= 650 && rndm < 750 ){
+        reward = [
+            WheelResults.SixtyNineCoins.Name,
+            WheelResults.SixtyNineCoins.Description
+        ];
+        coins = 69;
+    }else if(rndm >= 750 && rndm < 870){
+        reward = [
+            WheelResults.OneHundredCoins.Name,
+            WheelResults.OneHundredCoins.Description
+        ];
+        coins = 100;
+    }else if(rndm >= 870 && rndm < 970 ){
+        reward = [
+            WheelResults.OneFiftyCoins.Name,
+            WheelResults.OneFiftyCoins.Description
+        ];
+        coins = 150;
+    }else if(rndm >= 970 && rndm < 990 ){
+        reward = [
+            WheelResults.Legendary.Name,
+            WheelResults.Legendary.Description
+        ];
+        coins = -1;
+    }else if(rndm >= 990 && rndm <= 1000){
+        reward = [
+            WheelResults.Jackpot.Name,
+            WheelResults.Jackpot.Description
+        ];
+        coins = 1000;
+    }else{
+        console.log(`ERROR: Failed to choose WheelResult`);
+        return null;
+    }
+    return [reward, coins];
+};
 

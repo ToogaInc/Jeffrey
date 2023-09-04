@@ -71,7 +71,8 @@ export const Balance = {
         if (!userInUsers) {
             await addUser(target.id, target.username);
         }
-        const userInWallet = await findOrAddUserWallet(target.id);
+
+        await findOrAddUserWallet(target.id);
 
         //checks targets current balance, then adds 'add' to it (can be negative)
         if (add !== null) {
@@ -105,8 +106,9 @@ export const Balance = {
             }
             await interaction.channel!.send({ embeds: [embed] });
         } catch {
-            console.log(`ERROR: Failed to send reply and/or embed in ${interaction.channelId}`);
+            console.log(`ERROR: Could not send msg embed in ${interaction.channelId}`);
             return;
         }
+
     }
 };

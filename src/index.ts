@@ -15,6 +15,7 @@ import { Balance } from './commands/balance';
 import { Poll } from './commands/poll';
 import { Roll } from './commands/roll';
 import { DB } from './JeffreyDB';
+import { Spin } from './commands/spin';
 
 config();
 
@@ -61,7 +62,8 @@ async function main() {
           Cat.info.toJSON(),
           Poll.info.toJSON(),
           Balance.info.toJSON(),
-          Roll.info.toJSON()
+          Roll.info.toJSON(),
+          Spin.info.toJSON()
         ]
       }
     );
@@ -84,7 +86,7 @@ client.on('interactionCreate', async (interaction) => {
   }
   const cooldownMap = cooldown.get(commandName)!;
 
-  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now() && interaction.user.id !== '218823980524634112') {
+  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now()) {
     const cooldownRemaining = (cooldownMap.get(userID)! - Date.now()) / 1000;
     await interaction.reply(`Please wait ${cooldownRemaining.toFixed(1)} seconds.`);
     return;
@@ -106,13 +108,17 @@ client.on('interactionCreate', async (interaction) => {
     await Cat.run(interaction);
   }
   if (commandName === 'poll') {
-    Poll.run(interaction as ChatInputCommandInteraction);
+    await Poll.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'balance') {
     await Balance.run(interaction as ChatInputCommandInteraction);
+    await Balance.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'roll') {
-    await Roll.run(interaction)
+    await Roll.run(interaction);
+  }
+  if (commandName === 'spin') {
+    await Spin.run(interaction);
   }
 });
 
@@ -124,6 +130,20 @@ client.on('messageCreate', async (message) => {
     await Mock.effect(message);
   }
 });
+
 export const mockTargets = new Set();
+
+export async function fishGame(): Promise<void> {
+
+const fisharr = [ "🐸", "🐢", "🦎", "🐬", "🦀", "🦑", "🐈", "🍱","🐙","🐚"] 
+const rodarr = ['rare', 'uncommon'] 
+const rare = 10 
+const uncommon = 15
+
+const rndm = Math.floor(Math.random() * fisharr.length);
+const emoji = fisharr[rndm];
+console.log(emoji);
+
+}
 
 main();
