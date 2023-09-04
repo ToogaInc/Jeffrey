@@ -1,5 +1,5 @@
-import { CommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { numberEmojis } from '../utils';
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { NUMBER_EMOJIS } from '../utils';
 
 const MAX_CHOICES = 5;
 
@@ -20,16 +20,17 @@ export const Poll = {
                     .setRequired(false));
         }
     },
-    run: async (interaction: CommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
         if (!interaction.guild) { //Checks if the command is NOT done in a server
             await interaction.reply('This command can only be done in a server.');
             return;
         }
-        const questionString = interaction.options.get('question')?.value;
+        const questionString = interaction.options.getString('question');
 
         if (!questionString || typeof questionString !== 'string') return;
 
-        if (questionString.length > 256) {//char limit 
+        //char limit 
+        if (questionString.length > 256) {
             interaction.reply(`Question is too long. (max 256 char.)`);
         }
 
@@ -40,7 +41,8 @@ export const Poll = {
                 choices.push(choice);
             }
         }
-        if (choices.length === 0) {//No choices by user = Yes and No
+        //No choices by user = Yes and No
+        if (choices.length === 0) {
             choices.push('Yes');
             choices.push('No');
         }
@@ -51,35 +53,38 @@ export const Poll = {
                 name: interaction.user.displayName,
                 iconURL: interaction.user.displayAvatarURL()
             })
+            //Discord embed spacing to look cleaner
             .addFields(
-                { name: ' ', value: '** **' }//Discord embed spacing to look nicer
+                { name: ' ', value: '** **' }
             );
         for (let i = 0; i < choices.length; i++) {
             embed.addFields(
-                { name: ' ', value: `${numberEmojis[i]}  ${choices[i]}` },
+                { name: ' ', value: `${NUMBER_EMOJIS[i]}  ${choices[i]}` },
             )
             if (i + 1 < choices.length) {
+                //more spacing
                 embed.addFields(
-                    { name: ' ', value: '** **' },//more spacing
+                    { name: ' ', value: '** **' },
                 )
             }
         };
 
-try {
-    const embedMessage = await interaction.channel!.send({ embeds: [embed] }); //send created embed
-    interaction.reply({ content: 'Poll created!', ephemeral: true });
-
-    // React to the embed with emojis
-    for (let i = 0; i < choices.length; i++) {
         try {
-            await embedMessage.react(`${numberEmojis[i]}`);
+            //send created embed
+            const embedMessage = await interaction.channel!.send({ embeds: [embed] });
+            interaction.reply({ content: 'Poll created!', ephemeral: true });
+
+            // React to the embed with emojis
+            for (let i = 0; i < choices.length; i++) {
+                try {
+                    await embedMessage.react(`${NUMBER_EMOJIS[i]}`);
+                } catch {
+                    console.log('ERROR: Could not react with emoji.');
+                }
+            }
         } catch {
-            console.log('ERROR: Could not react with emoji.');
+            console.log(`ERROR: Could not send embed in ${interaction.channelId}`);
         }
-    }
-} catch {
-    console.log(`ERROR: Could not send embed in ${interaction.channelId}`);
-}
 
     }
 };

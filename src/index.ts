@@ -5,12 +5,16 @@ import {
   ClientOptions,
   REST,
   Routes,
-  GatewayIntentBits
+  GatewayIntentBits,
+  ChatInputCommandInteraction
 } from 'discord.js';
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
+import { Balance } from './commands/balance';
 import { Poll } from './commands/poll';
+import { Roll } from './commands/roll';
+import { DB } from './JeffreyDB';
 
 config();
 
@@ -38,6 +42,8 @@ client.login(token);
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user!.tag}`);
+  DB.test();
+  DB.sync();
 });
 
 const rest = new REST({ version: '10' }).setToken(token!);
@@ -53,7 +59,9 @@ async function main() {
           Ping.info.toJSON(),
           Mock.info.toJSON(),
           Cat.info.toJSON(),
-          Poll.info.toJSON()
+          Poll.info.toJSON(),
+          Balance.info.toJSON(),
+          Roll.info.toJSON()
         ]
       }
     );
@@ -76,7 +84,7 @@ client.on('interactionCreate', async (interaction) => {
   }
   const cooldownMap = cooldown.get(commandName)!;
 
-  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now()) {
+  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now() && interaction.user.id !== '218823980524634112') {
     const cooldownRemaining = (cooldownMap.get(userID)! - Date.now()) / 1000;
     await interaction.reply(`Please wait ${cooldownRemaining.toFixed(1)} seconds.`);
     return;
@@ -98,7 +106,13 @@ client.on('interactionCreate', async (interaction) => {
     await Cat.run(interaction);
   }
   if (commandName === 'poll') {
-    Poll.run(interaction);
+    Poll.run(interaction as ChatInputCommandInteraction);
+  }
+  if (commandName === 'balance') {
+    await Balance.run(interaction as ChatInputCommandInteraction);
+  }
+  if (commandName === 'roll') {
+    await Roll.run(interaction)
   }
 });
 
