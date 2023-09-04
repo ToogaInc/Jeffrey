@@ -4,7 +4,7 @@ import { replyWithEmbed, rng } from '../utils';
 import {
     addNewGacha,
     findOrAddUserWallet,
-    AddOrSubtractBalance,
+    addOrSubtractBalance,
     checkBalance,
     gachaLvlUp,
     checkGachaLevel,
@@ -21,15 +21,12 @@ export const Roll = {
             await interaction.reply('this command can only be done in a server');
             return;
         }
-        let embed: EmbedBuilder;
-        let currentBalance: number;
 
-        const price: number = 5;
         const userID = interaction.user.id;
 
         await findOrAddUserWallet(userID);
 
-        currentBalance = await checkBalance(userID);
+        let currentBalance = await checkBalance(userID);
 
         if (!currentBalance && currentBalance !== 0) {
             console.log(`${userID}'s currentBalance is NULL or undefined`);
@@ -37,11 +34,13 @@ export const Roll = {
             return;
         }
 
+        const price: number = 5;
+        
         if (currentBalance < price) {
             await interaction.reply('not enough JeffreyCoins!');
             return;
         } else {
-            await AddOrSubtractBalance(userID, -price);
+            await addOrSubtractBalance(userID, -price);
             currentBalance -= price;
         }
 
@@ -75,6 +74,9 @@ export const Roll = {
         } else {
             await gachaLvlUp(userID, gacha);
         }
+
+        let embed: EmbedBuilder;
+        
         if (raritySelect !== 'Legendary') {
             embed = new EmbedBuilder()
                 .setTitle(`You pulled a **${displayRarity}** Jeffrey!`)
@@ -87,6 +89,7 @@ export const Roll = {
             if (!legendaryInfo || !legendaryInfo[0] || !legendaryInfo[1]) {
                 console.log(`ERROR: could not find legendaryInfo`);
                 await interaction.reply('Sorry the command could not be completed, please contact a developer.');
+                return;
             } else {
                 embed = new EmbedBuilder()
                     .setTitle('YOU PULLED A LEGENDARY JEFFREY!!!')
@@ -95,10 +98,7 @@ export const Roll = {
                     .addFields({ name: `${legendaryInfo[0]}`, value: `${legendaryInfo[1]}` });
             }
         }
-        if (!embed!) {
-            console.log(`ERROR: Embed is undefined!`);
-            await interaction.reply('Sorry the command could not be completed, please contact a developer.')
-        }
+
         const gachaLevel = await checkGachaLevel(userID, gacha);
         let starArray = '';
         if (!gachaLevel) {
@@ -108,7 +108,7 @@ export const Roll = {
         for (let i = 0; i < gachaLevel; i++) {
             starArray += '⭐';
         }
-        embed!.setDescription(starArray);
+        embed.setDescription(starArray);
         try {
             await replyWithEmbed(embed!, interaction);
         } catch {

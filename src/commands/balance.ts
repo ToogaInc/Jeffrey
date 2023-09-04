@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
-import { checkUser, checkBalance, AddOrSubtractBalance, addUser, findOrAddUserWallet } from '../DBUtils';
+import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserWallet } from '../DBUtils';
 import { replyWithEmbed } from '../utils';
 
 export const Balance = {
@@ -36,8 +36,8 @@ export const Balance = {
             //need at least one of these roles to use the 'add' option
             const role = [
                 getRole.find(role => role.name.toLowerCase() === 'moderator'),
-                getRole.find(role => role.name.toLocaleLowerCase() === 'officer'),
-                getRole.find(role => role.name.toLocaleLowerCase() === 'head raid leader')
+                getRole.find(role => role.name.toLowerCase() === 'officer'),
+                getRole.find(role => role.name.toLowerCase() === 'head raid leader')
             ];
 
             const commandUser = await interaction.guild.members.fetch(userID);
@@ -76,7 +76,7 @@ export const Balance = {
         //checks targets current balance, then adds 'add' to it (can be negative)
         if (add !== null) {
             startingBalance = await checkBalance(target.id);
-            await AddOrSubtractBalance(target.id, add);
+            await addOrSubtractBalance(target.id, add);
         }
 
         //checks targets balance

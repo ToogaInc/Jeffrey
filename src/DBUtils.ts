@@ -60,7 +60,7 @@ export async function checkBalance(userID: string): Promise<number> {
  * @param userID - Users Discord ID
  * @param amount - Positive or Negative integer to Add or Subtract 'balance' by
  */
-export async function AddOrSubtractBalance(userID: string, amount: number): Promise<void> {
+export async function addOrSubtractBalance(userID: string, amount: number): Promise<void> {
     await Wallet.increment({ balance: amount }, { where: { userid: userID } });
     console.log(`${userID}'s wallet has been changed by: ${amount}`);
 }
