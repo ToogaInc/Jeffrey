@@ -3,7 +3,7 @@ import { SlashCommandBuilder, CommandInteraction, EmbedBuilder } from "discord.j
 import { replyWithEmbed, rng } from '../utils';
 import {
     addNewGacha,
-    findOrAddUserWallet,
+    findOrAddUserBalance,
     addOrSubtractBalance,
     checkBalance,
     gachaLvlUp,
@@ -24,7 +24,7 @@ export const Roll = {
 
         const userID = interaction.user.id;
 
-        await findOrAddUserWallet(userID);
+        await findOrAddUserBalance(userID);
 
         let currentBalance = await checkBalance(userID);
 

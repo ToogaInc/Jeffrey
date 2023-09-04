@@ -1,4 +1,4 @@
-import { User, Wallet, GachaInv, DailyWheel } from "./JeffreyDB"
+import { User, Balance, Gacha, DailyWheel } from "./JeffreyDB"
 
 /**
  * Checks if the given userID is in the "User" table.
@@ -33,47 +33,47 @@ export async function addUser(userID: string, username: string): Promise<void> {
 /**
  * Searches for the 'balance' associated the given users Discord ID.
  * 
- * If no balance was found, it calls another function to create a new row in "Wallet"-
+ * If no balance was found, it calls another function to create a new row in "Balance"-
  * -which contains the users Discord ID, and 'balance' defaults to 0.
  * 
  * (balance is used in a monetary context $$$)
  * 
  * @param {string} userID - Users Discord ID
- * @returns {Promise<number>} -  Returns the users current balance in "Wallet" table.
+ * @returns {Promise<number>} -  Returns the users current balance in "Balance" table.
  *                               Returns 0 if no number was found (default value).
  */
 export async function checkBalance(userID: string): Promise<number> {
-    const userBalance = await Wallet.findOne({ where: { userid: userID } });
+    const userBalance = await Balance.findOne({ where: { userid: userID } });
     if (userBalance) {
         console.log(`${userID} has a balance of ${userBalance.balance}`);
         return userBalance.balance;
     } else {
-        await findOrAddUserWallet(userID);
+        await findOrAddUserBalance(userID);
         return 0;
     }
 };
 
 /**
  * Add or Subtract the 'balance' associated with the users Discord ID-
- * -in the "Wallet" table by 'amount'.
+ * -in the "Balance" table by 'amount'.
  * 
  * @param {string}userID - Users Discord ID
  * @param {number}amount - Positive or Negative integer to Add or Subtract 'balance' by
  */
 export async function addOrSubtractBalance(userID: string, amount: number): Promise<void> {
-    await Wallet.increment({ balance: amount }, { where: { userid: userID } });
+    await Balance.increment({ balance: amount }, { where: { userid: userID } });
     console.log(`${userID}'s wallet has been changed by: ${amount}`);
 }
 
 /**
- * Checks if there is a row in the "Wallet" table that contains the users Discord ID-
+ * Checks if there is a row in the "Balance" table that contains the users Discord ID-
  * -creates one if it is not found.
  * 
  * @param {string} userID - Users Discord ID
  */
-export async function findOrAddUserWallet(userID: string): Promise<void> {
-    await Wallet.findOrCreate({ where: { userid: userID } });
-    console.log(`Found or created Wallet for ${userID}`);
+export async function findOrAddUserBalance(userID: string): Promise<void> {
+    await Balance.findOrCreate({ where: { userid: userID } });
+    console.log(`Found or created Balance for ${userID}`);
 }
 
 /**
@@ -112,7 +112,7 @@ export async function addNewGacha(userID: string, gachaURL: string): Promise<voi
  * Function should only be called when it is confirmed that a row exists with 'userID' and 'gachaURL' (ie: the 'checkGachaInv' function).
  *  
  * @example 
- *         (Wallet table)
+ *         (Balance table)
  *      table starts with: | userID: 8743284 | gachas: https:/sajdjioafh.png | amt: 1 |
  *          table becomes: | userID: 8743284 | gachas: https:/sajdjioafh.png | amt: 2 |
  * 

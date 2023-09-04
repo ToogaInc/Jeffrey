@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
-import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserWallet } from '../DBUtils';
+import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserBalance } from '../DBUtils';
 import { replyWithEmbed } from '../utils';
 
 export const Balance = {
@@ -72,7 +72,7 @@ export const Balance = {
             await addUser(target.id, target.username);
         }
 
-        await findOrAddUserWallet(target.id);
+        await findOrAddUserBalance(target.id);
 
         //checks targets current balance, then adds 'add' to it (can be negative)
         if (add !== null) {
@@ -88,7 +88,7 @@ export const Balance = {
         }
 
         const embed = new EmbedBuilder()
-            .setAuthor({ name: `${target.displayName}'s Wallet`, iconURL: target.displayAvatarURL() })
+            .setAuthor({ name: `${target.displayName}'s Balance`, iconURL: target.displayAvatarURL() })
             .addFields({ name: ' ', value: `Balance: ${targetBalance}` });
 
         //if no 'add' was specified, reply with embed of balance
