@@ -69,11 +69,17 @@ export const Roll = {
         let gachaLevel: number[] = [];
         let level: string[] = [];
         const embeds: EmbedBuilder[] = [];
+
+        //Cycle through all rolls, creates embed for each.
         for (let i = 0; i < rolls; i++) {
 
             await addToCollection(userID, gacha[i].id);
 
             const getLevel = await checkGachaLevel(userID, gacha[i].id);
+            if(!getLevel){
+                console.log(`ERROR: Invalid level for - User: ${userID}, Gacha: ${gacha[i].id}`);
+                await interaction.reply('An error has occured, please contact a developer');
+            }
             gachaLevel.push(getLevel);
 
             let starArray = '';
@@ -135,7 +141,7 @@ export const Roll = {
         });
 
         if (!gachaMessage) {
-            await interaction.reply('could not send embed, please contact a developer');
+            await interaction.reply('Could not send message embed, please contact a developer');
             return;
         }
 

@@ -24,8 +24,8 @@ export async function findOrAddToUser(userID: string, username: string, displayN
  * If none was found, creates one.
  * The user ID is the same for that user in every database table that contains a user_id.
  * 
- * @param {string} userID - user ID that is consistent across all database tables
- * @returns {Promise<number>} -  Returns the users current balance in "Wallet" table.
+ * @param {string} userID - Discord ID
+ * @returns {Promise<number>} -  Returns the users current balance in "Wallet" table (defaults to 0 if Wallet was created)
  */
 export async function checkOrStartWallet(userID: string): Promise<number> {
     const [userWallet, created] = await Wallet.findOrCreate({ where: { user_id: userID } });
@@ -45,7 +45,7 @@ export async function checkOrStartWallet(userID: string): Promise<number> {
  * Add or Subtract the 'balance' associated with the user ID in the "Wallet" table by 'amount'.
  * Function should only be used if you know that the row with 'user_id' exists (ie: call the checkOrStartWallet)
  * 
- * @param {string} userID - Users Discord ID
+ * @param {string} userID - Discord ID
  * @param {number} amount - Positive or Negative integer to Add or Subtract 'balance' by
  */
 export async function addOrSubtractWallet(userID: string, amount: number): Promise<void> {
@@ -60,8 +60,8 @@ export async function addOrSubtractWallet(userID: string, amount: number): Promi
  * Looking for if the user has previously aquired this gacha.(ie: if its a duplicate)
  * If its a duplicate, increase its level by 1 (up to 5);
  * 
- * @param {string} userID - Users Discord ID
- * @param {number} gachaID - ID for the gacha they have aquired
+ * @param {string} userID - Discord ID
+ * @param {number} gachaID - ID associated with specific gacha
  * @returns {Promise<Collection>} - 'Collection' object contains all information in affected row.
  */
 export async function levelUpOrAddGachaToCollection(userID: string, gachaID: number): Promise<Collection> {
@@ -81,12 +81,12 @@ export async function levelUpOrAddGachaToCollection(userID: string, gachaID: num
 }
 
 /**
- * Checks the 'level' column that is in the same row as userID and gachaID
+ * Checks the 'level' column that is in the same row as userID and gachaID in 'Collection' table.
  * Should only be used when you know that gachaID exists in the same row as userID
  * 
- * @param {string} userID - Users Discord ID
+ * @param {string} userID - Discord ID
  * @param {number} gachaID - ID associated with specific gacha
- * @returns {Promise<number>} - The 'amt' column in the row containing 'userID' and 'gachaID'
+ * @returns {Promise<number>} - The 'level' column in the row containing 'userID' and 'gachaID'
  */
 export async function checkGachaLevel(userID: string, gachaID: number): Promise<number> {
     const lvl = await Collection.findOne({ where: { user_id: userID, gacha_id: gachaID } });
