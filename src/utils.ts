@@ -27,45 +27,6 @@ export async function rng(min: number, max: number): Promise<number> {
 
     return randomNumber
 }
-/**
- * Replies to the command user with an embedded message.
- * Embed will be constructed in command files.
- * @param embed - Embed with desired information/fields
- * @param interaction - The command interaction to reply to.
- */
-export async function replyWithEmbed(embed: EmbedBuilder, interaction: CommandInteraction): Promise<void> {
-    try {
-        await interaction.reply({ embeds: [embed] });
-        console.log(`replied with embed in ${interaction.channelId}`);
-    } catch {
-        console.log(`ERROR: could not send embed in ${interaction.channelId}`);
-        await interaction.reply(`An error has occured, please contact a developer.`);
-    }
-}
-
-/**
- * Sends an embedded message in the same channel that the user used a slash command.
- * Embed will be constructed in command files.
- * @param embed - Embed with desired information/fields
- * @param interaction - The command interaction to reply to.
- */
-export async function sendEmbedMessage(embed: EmbedBuilder, interaction: CommandInteraction): Promise<void> {
-    try{
-        await interaction.channel?.send({embeds: [embed]});
-    }catch {
-        console.log(`Could not send embed in ${interaction.channel}`);
-        await interaction.reply(`An error has occured, please contact a developer.`);
-    }
-}
-
-export async function editEmbedReply(embed: EmbedBuilder, interaction: CommandInteraction) {
-    try {
-        await interaction.editReply({embeds: [embed]});
-    }catch{
-        console.log(`Could not send embed in ${interaction.channel}`);
-        await interaction.reply(`An error has occured, please contact a developer.`);
-    }
-}
 
 export async function getEmbedColor(rarity: string): Promise<HexColorString> {
     let color: HexColorString;

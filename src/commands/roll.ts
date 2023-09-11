@@ -1,15 +1,15 @@
 
-import { 
-    SlashCommandBuilder, 
-    EmbedBuilder, 
-    ChatInputCommandInteraction, 
-    ButtonBuilder, 
-    ButtonStyle, 
-    ActionRowBuilder, 
-    ComponentType, 
-    Message, 
-    ButtonInteraction 
-    } from "discord.js";
+import {
+    SlashCommandBuilder,
+    EmbedBuilder,
+    ChatInputCommandInteraction,
+    ButtonBuilder,
+    ButtonStyle,
+    ActionRowBuilder,
+    ComponentType,
+    Message,
+    ButtonInteraction
+} from "discord.js";
 import {
     addOrSubtractWallet,
     addToCollection,
@@ -76,7 +76,7 @@ export const Roll = {
             await addToCollection(userID, gacha[i].id);
 
             const getLevel = await checkGachaLevel(userID, gacha[i].id);
-            if(!getLevel){
+            if (!getLevel) {
                 console.log(`ERROR: Invalid level for - User: ${userID}, Gacha: ${gacha[i].id}`);
                 await interaction.reply('An error has occured, please contact a developer');
             }
@@ -172,17 +172,17 @@ export const Roll = {
 
             if (i.customId === 'roll_again') {
                 if (!interaction.channel) return;
-            
+
                 const filter = (m: Message) => m.author.id === interaction.user.id;
                 await interaction.channel.send(`How many more rolls would you like to do? (Please type a number)`);
                 const collector = interaction.channel.createMessageCollector({ filter, time: 60000 });
-            
+
                 const collectListener = async (collected: Message) => {
                     const content = collected.content;
                     const parsedNumber = Number(content);
-            
+
                     if (!isNaN(parsedNumber)) {
-                        
+
                         collector.off('collect', collectListener);
                         await Roll.run(interaction, parsedNumber);
                     } else {
@@ -192,7 +192,7 @@ export const Roll = {
 
                 collector.on('collect', collectListener);
             }
-            
+
         });
     }
 };
@@ -224,8 +224,5 @@ async function updateEmbed(msg: string, interaction: ButtonInteraction, embed: E
     }
     row.setComponents(previous, next, rollAgain);
 
-    if (first) {
-        row
-    }
     await interaction.update({ content: msg, embeds: [embed], components: [row] });
 }

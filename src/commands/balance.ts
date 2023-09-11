@@ -1,6 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
 import { addOrSubtractWallet, findOrAddToUser, checkOrStartWallet } from '../DBMain';
-import { replyWithEmbed } from '../utils';
 
 export const Wallet = {
     info: new SlashCommandBuilder()
@@ -89,7 +88,7 @@ export const Wallet = {
         //otherwise, reply with the balance change, then send embed
         try {
             if (!add) {
-                await replyWithEmbed(embed, interaction);
+                await interaction.reply({embeds: [embed]});
                 return;
             }
             if (add > 0) {
@@ -103,6 +102,5 @@ export const Wallet = {
             console.log(`ERROR: Could not send msg embed in ${interaction.channelId}`);
             return;
         }
-
     }
 };

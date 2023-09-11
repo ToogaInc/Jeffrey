@@ -1,5 +1,3 @@
-import { rng } from './utils';
-
 
 //Object containing the 4 rarities, 'Common', 'Uncommon', 'Rare' and 'Legendary'.
 //Each rarity is an array of gacha objects, containing the link(URL), name and description of all gachas.
