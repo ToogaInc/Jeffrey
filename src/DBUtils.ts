@@ -1,170 +1,64 @@
-import { User, Balance, Gacha, DailyWheel } from "./JeffreyDB"
+
+import { Gacha } from './JeffreyDB';
+import { rng } from "./utils";
+
 
 /**
- * Checks if the given userID is in the "User" table.
+ * Takes a rarity, randomly picks one gacha among that rarity, returns it
  * 
- * @param {string} userID - Users Discord ID
- * @returns {Promise<boolean>}- True or False (whether or not their userID is in "User" table)
+ * @param {string} rarity - Which rarity it should choose from
+ * @returns {Promise<Gacha>} - random 'rarity' gacha
  */
-export async function checkUser(userID: string): Promise<boolean> {
+export async function getRandomGacha(rarity: string): Promise<Gacha> {
 
-    const user = await User.findOne({ where: { userid: userID } });
-    if (user) {
-        console.log(`user ${user.id} found in Users`);
-        return true;
-    } else {
-        console.log(`user ${userID} NOT found in Users`);
-        return false;
+    const allGachaOfRarity = await Gacha.findAll({ where: { rarity: rarity } });
+
+    const randomGacha = Math.floor(Math.random() * Math.floor(allGachaOfRarity.length));
+
+    const gacha = allGachaOfRarity[randomGacha];
+
+    return gacha;
+}
+
+/**
+ * Calls getRandomGacha and specifies that it wants a 'legendary' gacha 
+ * 
+ * @returns {Promise<Gacha>} - 'Gacha' object containing table information about a specific Gacha
+ */
+export async function getRandomLegendary(): Promise<Gacha> {
+
+    const legendaryGacha = await getRandomGacha('legendary');
+    
+    return legendaryGacha;
+}
+
+/**
+ * Randomly selects rarity, then calls getRandomGacha to choose a random gacha of that rarity
+ * 
+ * @param {number} rolls - The number of gacha that should be returned
+ * @returns {Promise<Gacha>} - 'Gacha' object containing table information about a random gacha of random rarity.
+ */
+export async function rollForGacha(rolls: number): Promise<Gacha[]> {
+    const gacha: Gacha[] = [];
+
+    for(let i = 0; i < rolls; i++){
+
+    const rndm = await rng(0, 100);
+    let rarity: string;
+
+    if (rndm <= 65) {
+        rarity = 'common';
+    } else if (rndm > 65 && rndm <= 90) {
+        rarity = 'uncommon';
+    } else if (rndm > 90 && rndm < 99) {
+        rarity = 'rare';
+    } else if (rndm >= 100) {
+        rarity = 'legendary';
     }
+
+    const randomGacha = await getRandomGacha(rarity!);
+    gacha.push(randomGacha);
 }
 
-/**
- * Adds a row in the "User" table, which contains a users discord ID and discord Username.
- * 
- * @param {string} userID - Users Discord ID
- * @param {string} username - Users Discord Username(not displayname)
- */
-export async function addUser(userID: string, username: string): Promise<void> {
-
-    await User.create({ userid: userID, username: username });
-    console.log(`added ${userID} to Users`);
+    return gacha;
 }
-
-/**
- * Searches for the 'balance' associated the given users Discord ID.
- * 
- * If no balance was found, it calls another function to create a new row in "Balance"-
- * -which contains the users Discord ID, and 'balance' defaults to 0.
- * 
- * (balance is used in a monetary context $$$)
- * 
- * @param {string} userID - Users Discord ID
- * @returns {Promise<number>} -  Returns the users current balance in "Balance" table.
- *                               Returns 0 if no number was found (default value).
- */
-export async function checkBalance(userID: string): Promise<number> {
-    const userBalance = await Balance.findOne({ where: { userid: userID } });
-    if (userBalance) {
-        console.log(`${userID} has a balance of ${userBalance.balance}`);
-        return userBalance.balance;
-    } else {
-        await findOrAddUserBalance(userID);
-        return 0;
-    }
-};
-
-/**
- * Add or Subtract the 'balance' associated with the users Discord ID-
- * -in the "Balance" table by 'amount'.
- * 
- * @param {string}userID - Users Discord ID
- * @param {number}amount - Positive or Negative integer to Add or Subtract 'balance' by
- */
-export async function addOrSubtractBalance(userID: string, amount: number): Promise<void> {
-    await Balance.increment({ balance: amount }, { where: { userid: userID } });
-    console.log(`${userID}'s wallet has been changed by: ${amount}`);
-}
-
-/**
- * Checks if there is a row in the "Balance" table that contains the users Discord ID-
- * -creates one if it is not found.
- * 
- * @param {string} userID - Users Discord ID
- */
-export async function findOrAddUserBalance(userID: string): Promise<void> {
-    await Balance.findOrCreate({ where: { userid: userID } });
-    console.log(`Found or created Balance for ${userID}`);
-}
-
-/**
- * Checks for a row in GachaInv that contains both 'userID' and 'gachaURL'.
- * Looking for if the user has previously aquired this gacha.(ie: if its a duplicate)
- * 
- * @param {string} userID - Users Discord ID
- * @param {string} gachaURL - URL associated with a specific gacha item (picture).
- * @returns {Promise<boolean>} - True or False (whether or not userID is in the same row as gachaURL in "GachaInv" table)
- */
-export async function checkIfUserHasGachaInv(userID: string, gachaURL: string): Promise<boolean> {
-    const user = await GachaInv.findOne({ where: { userid: userID, gachas: gachaURL } });
-    if (user) {
-        console.log(`found ${userID} in GachaInvs`);
-        return true;
-    } else {
-        console.log(`did NOT find ${userID} in GachaInvs`);
-        return false;
-    }
-}
-
-/**
- * Adds a row in "GachaInv" table containing the users Disord ID, their new gacha picture, and setting amt to 1.
- * This function must be called only when we know this row does not already exist (ie: call the checkGachaInv function before this).
- * 
- * @param {string} userID - Users Discord ID
- * @param {string} achaURL - URL associated with a specific gacha item (picture).
- */
-export async function addNewGacha(userID: string, gachaURL: string): Promise<void> {
-    await GachaInv.create({ userid: userID, gachas: gachaURL, amt: 1 });
-    console.log(`${userID} added to GachaInvs with their new ${gachaURL}`);
-}
-
-/**
- * Increases the amount ('amt') column in the row that contains both userID and gachaURL.
- * Function should only be called when it is confirmed that a row exists with 'userID' and 'gachaURL' (ie: the 'checkGachaInv' function).
- *  
- * @example 
- *         (Balance table)
- *      table starts with: | userID: 8743284 | gachas: https:/sajdjioafh.png | amt: 1 |
- *          table becomes: | userID: 8743284 | gachas: https:/sajdjioafh.png | amt: 2 |
- * 
- * @param userID - Users Discord ID
- * @param gachaURL - URL associated with a specific gacha item (picture).
- */
-export async function gachaLvlUp(userID: string, gachaURL: string): Promise<void> {
-    await GachaInv.increment({ amt: 1 }, { where: { userid: userID, gachas: gachaURL } });
-    console.log(`increased ${gachaURL}'s level by 1 for ${userID}!`);
-}
-
-/**
- * Checks the 'amt' number column that is in the row of the users Discord ID and Gacha URL/ID. 
- * 
- * @param {string} userID - Users Discord ID
- * @param {string} gachaURL - URL associated with a specific gacha item (picture).
- * @returns {Promise<number>} - The 'amt' column in the row containing 'userID' and 'gachaURL'
- *                              Returns 0 if no 'amt' was found.(default value is 1, so 0 is impossible for 'amt')
- */
-export async function checkGachaLevel(userID: string, gachaURL: string): Promise<number> {
-    const level = await GachaInv.findOne({ where: { userid: userID, gachas: gachaURL } });
-    if (level) {
-        return level.amt;
-    } else {
-        return 0;
-    }
-};
-/**
- * Checks if the users Discord ID is in the DailyWheel table,
- * if not, create a new row with the userID 
- * 
- * @param {string} userID - Users Discord ID
- */
-export async function findOrCreateDailyWheel(userID: string): Promise<void> {
-
-        await DailyWheel.findOrCreate({ where: { userid: userID } });
-        console.log(`${userID} found or created in DailyWheel`);
-};
-
-/**
- * Checks how many spins are left for given userID (Discord ID),
- * and when the wheel resets (every 24 hours)
- * 
- * @param {string} userID - Users Discord ID
- * @returns {[number, Date]} - How many spins left, and when the users wheel will regain its available spins.
- */
-export async function checkSpins(userID: string): Promise<[number, Date]> {
-
-        const wheel = await DailyWheel.findOne({ where: { userid: userID } });
-        const endTime = new Date(wheel!.createdAt);
-
-        endTime.setHours(endTime.getHours() + 24);
-
-        return [wheel!.spins, endTime];
-};

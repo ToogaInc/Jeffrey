@@ -56,8 +56,8 @@ export const Poll = {
 
             //Discord embed spacing to look nicer
             .addFields(
-                { name: ' ', value: '** **' }
-                { name: ' ', value: '** **' }
+                { name: ' ', value: '** **' },
+                { name: ' ', value: '** **' },
             );
         for (let i = 0; i < choices.length; i++) {
             embed.addFields(
@@ -74,8 +74,6 @@ export const Poll = {
         };
 
         try {
-            //send created embed
-            const embedMessage = await interaction.channel!.send({ embeds: [embed] });
             //send created embed
             const embedMessage = await interaction.channel!.send({ embeds: [embed] });
             interaction.reply({ content: 'Poll created!', ephemeral: true });

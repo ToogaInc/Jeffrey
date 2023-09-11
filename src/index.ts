@@ -11,11 +11,10 @@ import {
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
-import { Balance } from './commands/balance';
+import { Wallet } from './commands/balance';
 import { Poll } from './commands/poll';
 import { Roll } from './commands/roll';
 import { DB } from './JeffreyDB';
-import { Spin } from './commands/spin';
 
 config();
 
@@ -30,12 +29,10 @@ const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMembers,
   GatewayIntentBits.GuildMessages,
-  GatewayIntentBits.MessageContent,
-]
+  GatewayIntentBits.MessageContent
+];
 
-const options: ClientOptions = {
-  intents: intents,
-};
+const options: ClientOptions = { intents: intents };
 
 const client = new Client(options);
 
@@ -61,9 +58,8 @@ async function main() {
           Mock.info.toJSON(),
           Cat.info.toJSON(),
           Poll.info.toJSON(),
-          Balance.info.toJSON(),
-          Roll.info.toJSON(),
-          Spin.info.toJSON()
+          Wallet.info.toJSON(),
+          Roll.info.toJSON()
         ]
       }
     );
@@ -86,15 +82,15 @@ client.on('interactionCreate', async (interaction) => {
   }
   const cooldownMap = cooldown.get(commandName)!;
 
-  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now()) {
+  if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now() && interaction.user.id !== '218823980524634112') {
     const cooldownRemaining = (cooldownMap.get(userID)! - Date.now()) / 1000;
     await interaction.reply(`Please wait ${cooldownRemaining.toFixed(1)} seconds.`);
-    return;
   }
   cooldownMap.set(userID, Date.now() + cooldownTime);
 
-  console.log(`user ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
-    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt}`);
+  console.log(
+    `user ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
+    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt.getUTCDate()}`);
 
   if (commandName === 'ping') {
     await Ping.run(interaction);
@@ -111,14 +107,10 @@ client.on('interactionCreate', async (interaction) => {
     await Poll.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'balance') {
-    await Balance.run(interaction as ChatInputCommandInteraction);
-    await Balance.run(interaction as ChatInputCommandInteraction);
+    await Wallet.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'roll') {
-    await Roll.run(interaction);
-  }
-  if (commandName === 'spin') {
-    await Spin.run(interaction);
+    await Roll.run(interaction as ChatInputCommandInteraction);
   }
 });
 
@@ -130,20 +122,6 @@ client.on('messageCreate', async (message) => {
     await Mock.effect(message);
   }
 });
-
 export const mockTargets = new Set();
-
-export async function fishGame(): Promise<void> {
-
-const fisharr = [ "🐸", "🐢", "🦎", "🐬", "🦀", "🦑", "🐈", "🍱","🐙","🐚"] 
-const rodarr = ['rare', 'uncommon'] 
-const rare = 10 
-const uncommon = 15
-
-const rndm = Math.floor(Math.random() * fisharr.length);
-const emoji = fisharr[rndm];
-console.log(emoji);
-
-}
 
 main();
