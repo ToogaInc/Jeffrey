@@ -14,10 +14,13 @@ import { Cat } from './commands/cat';
 import { Balance } from './commands/balance';
 import { Poll } from './commands/poll';
 import { Roll } from './commands/roll';
+import { DM } from './commands/dm';
 import { DB } from './JeffreyDB';
 
 config();
 
+Poll.addChoiceOptions();
+DM.addChoiceOptions();
 const cooldown = new Map<string, Map<string, number>>();
 const cooldownTime = 5000;
 
@@ -61,7 +64,8 @@ async function main() {
           Cat.info.toJSON(),
           Poll.info.toJSON(),
           Balance.info.toJSON(),
-          Roll.info.toJSON()
+          Roll.info.toJSON(),
+          DM.info.toJSON()
         ]
       }
     );
@@ -71,7 +75,6 @@ async function main() {
     console.error(error);
   }
 }
-Poll.addChoiceOptions();
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
@@ -91,8 +94,8 @@ client.on('interactionCreate', async (interaction) => {
   }
   cooldownMap.set(userID, Date.now() + cooldownTime);
 
-  console.log(`user ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
-    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt}`);
+  console.log(`User ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
+    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt.toUTCString()}`);
 
   if (commandName === 'ping') {
     await Ping.run(interaction);
@@ -112,7 +115,10 @@ client.on('interactionCreate', async (interaction) => {
     await Balance.run(interaction as ChatInputCommandInteraction);
   }
   if (commandName === 'roll') {
-    await Roll.run(interaction)
+    await Roll.run(interaction);
+  }
+  if (commandName === 'dm') {
+    await DM.run(interaction as ChatInputCommandInteraction);
   }
 });
 

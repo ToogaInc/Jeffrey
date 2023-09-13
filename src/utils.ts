@@ -1,4 +1,4 @@
-import { CommandInteraction, EmbedBuilder } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, Message, User } from 'discord.js';
 
 export const NUMBER_EMOJIS: string[] = [
     "1⃣",
@@ -39,5 +39,27 @@ export async function replyWithEmbed(embed: EmbedBuilder, interaction: CommandIn
     } catch {
         console.log(`ERROR: could not send embed in ${interaction.channelId}`);
         return;
+    }
+}
+
+export async function tryDelete(m: Message): Promise<boolean> {
+    try{
+        m.delete();
+        return true;
+    }catch(err){
+        console.error('could not delete message', err);
+        return false;
+    }
+}
+
+export async function tryToDMEmbed(embed: EmbedBuilder, member: User): Promise<boolean>{
+
+    try{
+        await member.send({embeds: [embed]});
+        console.log(`Sent message to ${member.id}`)
+        return true;
+    }catch(err){
+        console.error(`Could not send message to ${member.id}`, err);
+        return false;
     }
 }
