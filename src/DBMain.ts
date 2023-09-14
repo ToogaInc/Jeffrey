@@ -103,10 +103,10 @@ export async function checkGachaLevel(userID: string, gachaID: number): Promise<
  * @returns {Promise<Gacha | null>} - returns the 'Gacha' object which contains information about a specifc gacha
  */
 export async function gachaInfo(gachaID: number): Promise<Gacha | null> {
-    try{
-    const gachaInfo = await Gacha.findOne({ where: { id: gachaID } });
-    return gachaInfo;
-    }catch(e){
+    try {
+        const gachaInfo = await Gacha.findOne({ where: { id: gachaID } });
+        return gachaInfo;
+    } catch (e) {
         console.error(e);
         return null;
     }
@@ -137,4 +137,16 @@ export async function addToCollection(userID: string, gachaID: number): Promise<
         console.log(`GachaID: ${gachaID} - has been added to the Collection of - User: ${userID}`);
         return userGacha
     }
+}
+
+export async function findAllUserGachas(userID: string): Promise<Gacha[]> {
+    const gachas: Gacha[] = [];
+    const gachaIDs = await Collection.findAll({ where: { user_id: userID } });
+    for (const currentGacha of gachaIDs) {
+        const gachaInfo = await Gacha.findOne({ where: { id: currentGacha.gacha_id } });
+        if (gachaInfo) {
+            gachas.push(gachaInfo);
+        }
+    }
+    return gachas;
 }

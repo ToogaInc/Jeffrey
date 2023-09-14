@@ -25,7 +25,7 @@ export const Roll = {
         .setName('roll')
         .setDescription('Roll for Jeffrey\'s!')
         .addIntegerOption(option =>
-            option.setName('number')
+            option.setName('rolls')
                 .setDescription('How many rolls you want to do (costs 10 coins each!)')
                 .setRequired(false)),
 
@@ -37,10 +37,10 @@ export const Roll = {
 
         let rolls = 1
 
-        if (rollingAgain) {
+        if (rollingAgain && rollingAgain > 0) {
             rolls = rollingAgain;
         } else {
-            const checkIfRolls = interaction.options.getInteger('number')
+            const checkIfRolls = interaction.options.getInteger('rolls')
             if (checkIfRolls) {
                 rolls = checkIfRolls;
             }
@@ -70,8 +70,12 @@ export const Roll = {
 
         const gacha = await rollForGacha(rolls);
 
+        for (let i = 0; i < rolls; i++) {
+            await addToCollection(userID, gacha[i].id);
+        }
+
         let gachaLevel: number[] = [];
-        let level: string[] = [];
+        let displayLevel: string[] = [];
         const embeds: EmbedBuilder[] = [];
 
         //Cycle through all rolls, creates embed for each.
@@ -94,7 +98,7 @@ export const Roll = {
             if (gachaLevel[i] > 1) {
                 lvlUp = '**Rank Up!** | Level: ';
             }
-            level.push(lvlUp + starArray);
+            displayLevel.push(lvlUp + starArray);
 
             const color = await getEmbedColor(gacha[i].rarity);
 
@@ -102,7 +106,7 @@ export const Roll = {
             embed.setTitle(`${gacha[i].name} Jeffrey`)
                 .setDescription(`${gacha[i].description}`)
                 .setImage(gacha[i].link)
-                .setFields({ name: ' ', value: `${level[i]}` })
+                .setFields({ name: ' ', value: `${displayLevel[i]}` })
                 .setColor(color)
                 .setFooter({ text: `${0 + i + 1}/${rolls}` });
 
@@ -139,21 +143,39 @@ export const Roll = {
         buttonCollector.on('collect', async i => {
 
             if (i.customId === 'next') {
-                currentGacha += 1;
-                const nextRow = await checkIfFirstOrLast(row, rolls, currentGacha);
+                currentGacha++;
+                if (rolls - currentGacha <= 1) {
+                    b.next.setDisabled(true);
+                } else {
+                    b.next.setDisabled(false);
+                }
+                if (currentGacha < 1) {
+                    b.previous.setDisabled(true);
+                } else {
+                    b.previous.setDisabled(false);
+                }
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],
-                    components: [nextRow]
+                    components: [row]
                 });
             }
             if (i.customId === 'previous') {
-                currentGacha -= 1;
-                const prevRow = await checkIfFirstOrLast(row, rolls, currentGacha);
+                currentGacha--;
+                if (rolls - currentGacha <= 1) {
+                    b.next.setDisabled(true);
+                } else {
+                    b.next.setDisabled(false);
+                }
+                if (currentGacha < 1) {
+                    b.previous.setDisabled(true);
+                } else {
+                    b.previous.setDisabled(false);
+                }
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],
-                    components: [prevRow]
+                    components: [row]
                 });
             }
 
@@ -194,18 +216,3 @@ export const Roll = {
         });
     }
 };
-
-async function checkIfFirstOrLast(row: ActionRowBuilder<ButtonBuilder>, rolls: number, currentGacha: number): Promise<ActionRowBuilder<ButtonBuilder>> {
-
-    if (rolls - currentGacha <= 1) {
-        b.next.setDisabled(true);
-    } else {
-        b.next.setDisabled(false);
-    }
-    if (currentGacha < 1) {
-        b.previous.setDisabled(true);
-    } else {
-        b.previous.setDisabled(false);
-    }
-    return row.setComponents(b.previous, b.next, b.rollAgain);
-}

@@ -15,6 +15,7 @@ import { Wallet } from './commands/balance';
 import { Poll } from './commands/poll';
 import { Roll } from './commands/roll';
 import { DB } from './JeffreyDB';
+import { ViewJeffrey } from './commands/viewjeffrey';
 
 config();
 
@@ -59,7 +60,8 @@ async function main() {
           Cat.info.toJSON(),
           Poll.info.toJSON(),
           Wallet.info.toJSON(),
-          Roll.info.toJSON()
+          Roll.info.toJSON(),
+          ViewJeffrey.info.toJSON()
         ]
       }
     );
@@ -111,6 +113,9 @@ client.on('interactionCreate', async (interaction) => {
   }
   if (commandName === 'roll') {
     await Roll.run(interaction as ChatInputCommandInteraction);
+  }
+  if(commandName === 'viewjeffrey'){
+    await ViewJeffrey.run(interaction);
   }
 });
 
