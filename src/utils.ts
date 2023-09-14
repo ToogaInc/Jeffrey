@@ -1,4 +1,4 @@
-import { CommandInteraction, EmbedBuilder, HexColorString } from 'discord.js';
+import { Message, HexColorString } from 'discord.js';
 
 export const NUMBER_EMOJIS: string[] = [
     "1⃣",
@@ -42,4 +42,14 @@ export async function getEmbedColor(rarity: string): Promise<HexColorString> {
         color = `#000000` //black (shouldnt show up)
     }
     return color;
+}
+
+export async function tryDelete(m: Message): Promise<boolean> {
+    try{
+        m.delete();
+        return true;
+    }catch(err){
+        console.error('could not delete message', err);
+        return false;
+    }
 }

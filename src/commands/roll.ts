@@ -4,11 +4,9 @@ import {
     EmbedBuilder,
     ChatInputCommandInteraction,
     ButtonBuilder,
-    ButtonStyle,
     ActionRowBuilder,
     ComponentType,
-    Message,
-    ButtonInteraction
+    Message
 } from "discord.js";
 import {
     addOrSubtractWallet,
@@ -17,7 +15,10 @@ import {
     checkOrStartWallet
 } from "../DBMain";
 import { rollForGacha } from "../DBUtils";
-import { getEmbedColor } from "../utils";
+import { getEmbedColor, tryDelete } from "../utils";
+import { BUTTONS as b } from "../constants/buttons";
+
+let rollAgainInUse = false;
 
 export const Roll = {
     info: new SlashCommandBuilder()
@@ -34,15 +35,14 @@ export const Roll = {
             return;
         }
 
-        let rolls: number | null;
+        let rolls = 1
 
         if (rollingAgain) {
             rolls = rollingAgain;
         } else {
-            rolls = interaction.options.getInteger('number')
-
-            if (!rolls) {
-                rolls = 1;
+            const checkIfRolls = interaction.options.getInteger('number')
+            if (checkIfRolls) {
+                rolls = checkIfRolls;
             }
         }
         const userID = interaction.user.id;
@@ -51,14 +51,18 @@ export const Roll = {
 
         if (!currentWallet && currentWallet !== 0) {
             console.log(`${userID}'s currentWallet is NULL or undefined`);
-            interaction.reply('Failed to check balance, please contact a developer');
+            await interaction.reply('Failed to check balance, please contact a developer');
             return;
         }
 
         const price = 10;
 
         if (currentWallet < (price * rolls)) {
-            await interaction.reply('not enough JeffreyCoins!');
+            if (rollingAgain) {
+                await interaction.channel?.send('Not enough JeffreyCoins!');
+                return;
+            }
+            await interaction.reply('Not enough JeffreyCoins!');
             return;
         } else {
             await addOrSubtractWallet(userID, -price);
@@ -105,27 +109,12 @@ export const Roll = {
             embeds.push(embed);
         }
 
-        const next = new ButtonBuilder()
-            .setCustomId('next')
-            .setLabel('Next')
-            .setStyle(ButtonStyle.Primary);
-
-        const previous = new ButtonBuilder()
-            .setCustomId('previous')
-            .setLabel('Previous')
-            .setStyle(ButtonStyle.Primary)
-            .setDisabled(true);
-
-        const rollAgain = new ButtonBuilder()
-            .setCustomId('roll_again')
-            .setLabel('Roll Again!')
-            .setStyle(ButtonStyle.Danger);
-
         if (rolls === 1) {
-            next.setDisabled(true);
+            b.next.setDisabled(true);
         }
+        //previous starts disabled
         const row = new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(previous, next, rollAgain);
+            .addComponents(b.previous, b.next, b.rollAgain);
 
         let currentGacha = 0;
 
@@ -145,84 +134,78 @@ export const Roll = {
             return;
         }
 
-        const collector = gachaMessage!.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, componentType: ComponentType.Button, time: 1_800_000 });
+        const buttonCollector = gachaMessage.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, componentType: ComponentType.Button, time: 1_800_000 });
 
-        collector.on('collect', async i => {
+        buttonCollector.on('collect', async i => {
 
-            let first = true;
-            let last = false;
             if (i.customId === 'next') {
                 currentGacha += 1;
+                const nextRow = await checkIfFirstOrLast(row, rolls, currentGacha);
+                await i.update({
+                    content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
+                    embeds: [embeds[currentGacha]],
+                    components: [nextRow]
+                });
             }
             if (i.customId === 'previous') {
                 currentGacha -= 1;
+                const prevRow = await checkIfFirstOrLast(row, rolls, currentGacha);
+                await i.update({
+                    content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
+                    embeds: [embeds[currentGacha]],
+                    components: [prevRow]
+                });
             }
-            if (rolls! - currentGacha <= 1) {
-                last = true;
-            } else {
-                last = false;
-            }
-            if (currentGacha < 1) {
-                first = true;
-            } else {
-                first = false;
-            }
-            let msg = `**${gacha[currentGacha].rarity.toUpperCase()} JEFFREY**`;
-            await updateEmbed(msg, i, embeds[currentGacha], first, last);
 
             if (i.customId === 'roll_again') {
-                if (!interaction.channel) return;
+                if (rollAgainInUse) {
+                    await i.update({})
+                    await interaction.channel?.send('Please complete your previous roll again before using this one!');
+                } else {
+                    rollAgainInUse = true;
+                    row.setComponents(b.previous, b.next);
 
-                const filter = (m: Message) => m.author.id === interaction.user.id;
-                await interaction.channel.send(`How many more rolls would you like to do? (Please type a number)`);
-                const collector = interaction.channel.createMessageCollector({ filter, time: 60000 });
+                    await i.update({ components: [row] });
+                    const rollAgainMsg = await interaction.channel?.send(`How many more rolls would you like to do? (Please type a number, type '0' to cancel)`);
 
-                const collectListener = async (collected: Message) => {
-                    const content = collected.content;
-                    const parsedNumber = Number(content);
+                    const msgFilter = (m: Message) => m.author.id === interaction.user.id;
+                    const msgCollector = interaction.channel!.createMessageCollector({ filter: msgFilter, time: 60_000 });
 
-                    if (!isNaN(parsedNumber)) {
+                    msgCollector.on('collect', async m => {
+                        await tryDelete(m);
+                        if (m.content === '0') {
+                            await tryDelete(rollAgainMsg!);
+                            msgCollector.stop();
+                        }
+                        const content = m.content;
+                        const parsedNumber = Number(content);
 
-                        collector.off('collect', collectListener);
-                        await Roll.run(interaction, parsedNumber);
-                    } else {
-                        await interaction.channel?.send('Please type a valid number!');
-                    }
-                };
-
-                collector.on('collect', collectListener);
+                        if (!isNaN(parsedNumber)) {
+                            msgCollector.stop();
+                            rollAgainInUse = false;
+                            await Roll.run(interaction, parsedNumber);
+                            return;
+                        } else {
+                            await interaction.channel?.send('Please type a valid number!');
+                        }
+                    });
+                }
             }
-
         });
     }
 };
 
-async function updateEmbed(msg: string, interaction: ButtonInteraction, embed: EmbedBuilder, first: boolean, last: boolean): Promise<void> {
+async function checkIfFirstOrLast(row: ActionRowBuilder<ButtonBuilder>, rolls: number, currentGacha: number): Promise<ActionRowBuilder<ButtonBuilder>> {
 
-    const next = new ButtonBuilder()
-        .setCustomId('next')
-        .setLabel('Next')
-        .setStyle(ButtonStyle.Primary);
-
-    const previous = new ButtonBuilder()
-        .setCustomId('previous')
-        .setLabel('Previous')
-        .setStyle(ButtonStyle.Primary);
-
-    const rollAgain = new ButtonBuilder()
-        .setCustomId('roll_again')
-        .setLabel('Roll Again!')
-        .setStyle(ButtonStyle.Danger);
-
-    const row = new ActionRowBuilder<ButtonBuilder>()
-
-    if (first) {
-        previous.setDisabled(true);
+    if (rolls - currentGacha <= 1) {
+        b.next.setDisabled(true);
+    } else {
+        b.next.setDisabled(false);
     }
-    if (last) {
-        next.setDisabled(true);
+    if (currentGacha < 1) {
+        b.previous.setDisabled(true);
+    } else {
+        b.previous.setDisabled(false);
     }
-    row.setComponents(previous, next, rollAgain);
-
-    await interaction.update({ content: msg, embeds: [embed], components: [row] });
+    return row.setComponents(b.previous, b.next, b.rollAgain);
 }
