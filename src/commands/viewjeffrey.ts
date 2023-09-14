@@ -2,6 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, CommandInteraction, ComponentType, Sla
 import { findAllUserGachas } from '../DBMain';
 import { createGachaEmbeds } from '../DBUtils';
 import { BUTTONS as b } from '../constants/buttons';
+import { checkIfFirstOrLast } from '../utils';
 export const ViewJeffrey = {
     info: new SlashCommandBuilder()
         .setName('viewjeffrey')
@@ -33,20 +34,20 @@ export const ViewJeffrey = {
 
             if (i.customId === 'next') {
                 currentGacha += 1;
-                const nextRow = await checkIfFirstOrLast(row, length, currentGacha);
+                await checkIfFirstOrLast(currentGacha, length);
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],
-                    components: [nextRow]
+                    components: [row]
                 });
             }
             if (i.customId === 'previous') {
                 currentGacha -= 1;
-                const prevRow = await checkIfFirstOrLast(row, length, currentGacha);
+                await checkIfFirstOrLast(currentGacha, length);
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],
-                    components: [prevRow]
+                    components: [row]
                 });
             }
         })
@@ -54,18 +55,3 @@ export const ViewJeffrey = {
         }
     
 };
-
-export async function checkIfFirstOrLast(row: ActionRowBuilder<ButtonBuilder>, rolls: number, currentGacha: number): Promise<ActionRowBuilder<ButtonBuilder>> {
-
-    if (rolls - currentGacha <= 1) {
-        b.next.setDisabled(true);
-    } else {
-        b.next.setDisabled(false);
-    }
-    if (currentGacha < 1) {
-        b.previous.setDisabled(true);
-    } else {
-        b.previous.setDisabled(false);
-    }
-    return row.setComponents(b.previous, b.next);
-}
