@@ -3,6 +3,7 @@ import { findAllUserGachas } from '../DBMain';
 import { createGachaEmbeds } from '../DBUtils';
 import { BUTTONS as b } from '../constants/buttons';
 import { checkIfFirstOrLast } from '../utils';
+
 export const ViewJeffrey = {
     info: new SlashCommandBuilder()
         .setName('viewjeffrey')
