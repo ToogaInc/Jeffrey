@@ -15,7 +15,7 @@ import {
     checkOrStartWallet
 } from "../DBMain";
 import { rollForGacha } from "../DBUtils";
-import { getEmbedColor, tryDelete } from "../utils";
+import { checkIfFirstOrLast, getEmbedColor, tryDelete } from "../utils";
 import { BUTTONS as b } from "../constants/buttons";
 
 let rollAgainInUse = false;
@@ -56,8 +56,8 @@ export const Roll = {
         }
 
         const price = 10;
-
-        if (currentWallet < (price * rolls)) {
+        const totalPrice = price * rolls;
+        if (currentWallet < totalPrice) {
             if (rollingAgain) {
                 await interaction.channel?.send('Not enough JeffreyCoins!');
                 return;
@@ -65,7 +65,7 @@ export const Roll = {
             await interaction.reply('Not enough JeffreyCoins!');
             return;
         } else {
-            await addOrSubtractWallet(userID, -price);
+            await addOrSubtractWallet(userID, -totalPrice);
         }
 
         const gacha = await rollForGacha(rolls);
@@ -118,11 +118,11 @@ export const Roll = {
         }
         //previous starts disabled
         const row = new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(b.previous, b.next, b.rollAgain);
+            .setComponents(b.previous, b.next, b.rollAgain);
 
         let currentGacha = 0;
 
-        if (rollingAgain) {
+        if (rollingAgain && rollingAgain > 0) {
             await interaction.channel?.send(`${interaction.user} rolled for ${rolls} Jeffrey(s)!`);
         } else {
             await interaction.reply(`${interaction.user} rolled for ${rolls} Jeffrey(s)!`);
@@ -130,7 +130,7 @@ export const Roll = {
         const gachaMessage = await interaction.channel?.send({
             content: `**${gacha[currentGacha].rarity.toUpperCase()} JEFFREY**`,
             embeds: [embeds[currentGacha]],
-            components: [row],
+            components: [row]
         });
 
         if (!gachaMessage) {
@@ -143,17 +143,8 @@ export const Roll = {
         buttonCollector.on('collect', async i => {
 
             if (i.customId === 'next') {
-                currentGacha++;
-                if (rolls - currentGacha <= 1) {
-                    b.next.setDisabled(true);
-                } else {
-                    b.next.setDisabled(false);
-                }
-                if (currentGacha < 1) {
-                    b.previous.setDisabled(true);
-                } else {
-                    b.previous.setDisabled(false);
-                }
+                currentGacha += 1;
+                await checkIfFirstOrLast(currentGacha, rolls);
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],
@@ -161,17 +152,8 @@ export const Roll = {
                 });
             }
             if (i.customId === 'previous') {
-                currentGacha--;
-                if (rolls - currentGacha <= 1) {
-                    b.next.setDisabled(true);
-                } else {
-                    b.next.setDisabled(false);
-                }
-                if (currentGacha < 1) {
-                    b.previous.setDisabled(true);
-                } else {
-                    b.previous.setDisabled(false);
-                }
+                currentGacha -= 1;
+                await checkIfFirstOrLast(currentGacha, rolls);
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],

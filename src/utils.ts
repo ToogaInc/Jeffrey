@@ -1,4 +1,5 @@
-import { Message, HexColorString } from 'discord.js';
+import { Message, HexColorString, ActionRowBuilder, ButtonBuilder } from 'discord.js';
+import { BUTTONS as b } from './constants/buttons';
 
 export const NUMBER_EMOJIS: string[] = [
     "1⃣",
@@ -51,5 +52,19 @@ export async function tryDelete(m: Message): Promise<boolean> {
     }catch(err){
         console.error('could not delete message', err);
         return false;
+    }
+}
+
+export async function checkIfFirstOrLast(currentPos: number, max: number): Promise<void> {
+
+    if (max - currentPos <= 1) {
+        b.next.setDisabled(true);
+    } else {
+        b.next.setDisabled(false);
+    }
+    if (currentPos < 1) {
+        b.previous.setDisabled(true);
+    } else {
+        b.previous.setDisabled(false);
     }
 }
