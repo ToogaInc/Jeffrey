@@ -10,6 +10,7 @@ MessageCollector,
 User 
 } from 'discord.js';
 import { tryDelete, tryToDMEmbed } from '../utils';
+import { BUTTONS as b} from '../constants/buttons';
 
 const MAX_CHOICES = 15;
 
@@ -67,16 +68,6 @@ export const DM = {
             return;
         }
 
-        const cancel = new ButtonBuilder()
-            .setCustomId('cancel')
-            .setLabel('❌ Cancel')
-            .setStyle(ButtonStyle.Danger);
-
-        const yes = new ButtonBuilder()
-            .setCustomId('yes')
-            .setLabel('📤 Yes, Send!')
-            .setStyle(ButtonStyle.Success);
-
         //checks the 'message' string option
         const message = interaction.options.getString('message');
         let users: User[] = [];
@@ -98,7 +89,7 @@ export const DM = {
 
             //confirmation action row with buttons
             const row = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(cancel, yes);
+                .setComponents(b.cancel, b.yes);
 
             const embedMessage = await interaction.reply({ content: `Please read over the following:`, embeds: [embed], components: [row] });
 
@@ -135,51 +126,22 @@ export const DM = {
 
             const addMsgEmbed = new EmbedBuilder()
                 .setTitle('Create/Change Message')
-                .addFields({ name: ' ', value: '*Please type the message you would like me to send for you! Click "Done" when you are satisfied with the message.*' });
+                .setDescription('Please type the message you would like me to send for you! Click "Done" when you are satisfied with the message.');
 
             const addUsersEmbed = new EmbedBuilder()
                 .setTitle('Add Users')
                 .setDescription('Please type the names of the users you\'d like me to DM!');
 
-            const addMessage = new ButtonBuilder()
-                .setCustomId('add_message')
-                .setLabel('✉ Add/Change Message')
-                .setStyle(ButtonStyle.Primary);
-            const addUsers = new ButtonBuilder()
-                .setCustomId('add_users')
-                .setLabel('➕ Add Users')
-                .setStyle(ButtonStyle.Primary);
-
-            const send = new ButtonBuilder()
-                .setCustomId('send')
-                .setLabel('📤 Send')
-                .setStyle(ButtonStyle.Success);
-
-            const back = new ButtonBuilder()
-                .setCustomId('back')
-                .setLabel('⬅ Back')
-                .setStyle(ButtonStyle.Danger);
-
-            const done = new ButtonBuilder()
-                .setCustomId('done')
-                .setLabel('✅ Done')
-                .setStyle(ButtonStyle.Success);
-
-            const reset = new ButtonBuilder()
-                .setCustomId('reset')
-                .setLabel('🔃 Reset')
-                .setStyle(ButtonStyle.Danger);
-
             const startRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(cancel, addMessage, addUsers, send);
+                .setComponents(b.cancel, b.addMessage, b.addUsers, b.send);
 
             const addMsgRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(back, done);
+                .setComponents(b.back, b.done);
             const addUsersRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(back, done, reset);
+                .setComponents(b.back, b.done, b.reset);
 
             const confirmRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(back, yes);
+                .setComponents(b.back, b.yes);
 
 
             const embedMessage = await interaction.reply({ content: 'Please follow the instructions below!', embeds: [startEmbed], components: [startRow] });
@@ -302,7 +264,7 @@ export const DM = {
 
                 else if (i.customId === 'send') {
                     if (!DM || memberList.length < 1) {
-                        await interaction.channel?.send(`No message OR no user specified!`);
+                        await interaction.channel?.send(`No message/no user specified!`);
                         await i.update({})
                     } else {
                         startEmbed.setDescription(`**Are you sure you want to send this message to these users?**`);
@@ -314,6 +276,7 @@ export const DM = {
                         await i.update({ components: [confirmRow] });
                     }
                 } else if (i.customId === 'yes') {
+                    buttonCollector.stop();
                     await i.update({})
                     await sendDMs(DM, memberList);
                 }
