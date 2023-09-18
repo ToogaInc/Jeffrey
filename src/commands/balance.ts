@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
-import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserWallet } from '../utils/DBUtils';
-import { replyWithEmbed } from '../utils/miscUtils';
+import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserWallet } from '../databse/DBUtils';
+import { replyWithEmbed } from '../utilities/miscUtils';
 
 export const Balance = {
     info: new SlashCommandBuilder()

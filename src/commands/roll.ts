@@ -1,6 +1,6 @@
-import { JeffreyGachaURLs, displayLegendary } from "../DB/JeffreyGacha";
+import { JeffreyGachaURLs, displayLegendary } from "../databse/JeffreyGacha";
 import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, ChatInputCommandInteraction } from "discord.js";
-import { replyWithEmbed, rng } from '../utils/miscUtils';
+import { replyWithEmbed, rng } from '../utilities/miscUtils';
 import {
     addNewGacha,
     findOrAddUserWallet,
@@ -9,7 +9,7 @@ import {
     gachaLvlUp,
     checkGachaLevel,
     checkIfUserHasGachaInv
-} from "../utils/DBUtils";
+} from "../databse/DBUtils";
 
 export const Roll = {
     info: new SlashCommandBuilder()

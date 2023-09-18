@@ -6,8 +6,8 @@ import {
   GatewayIntentBits
 } from 'discord.js';
 import { Mock } from './commands/mock';
-import { DB } from './DB/JeffreyDB';
-import { checkAndRunCommand, initCmds } from './utils/cmdUtils';
+import { DB } from './databse/JeffreyDB';
+import { checkAndRunCommand, initCmds } from './utilities/cmdUtils';
 
 config();
 

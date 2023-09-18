@@ -8,7 +8,7 @@ import {
     MessageCollector,
     User
 } from 'discord.js';
-import { tryDelete, tryToDMEmbed } from '../utils/miscUtils';
+import { tryDelete, tryToDMEmbed } from '../utilities/miscUtils';
 import { BUTTONS } from '../constants/buttonConstants';
 import { TIME_IN_MS } from '../constants/miscConstants';
 
