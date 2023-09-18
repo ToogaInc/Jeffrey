@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
-import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserWallet } from '../DBUtils';
-import { replyWithEmbed } from '../utils';
+import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserWallet } from '../utils/DBUtils';
+import { replyWithEmbed } from '../utils/miscUtils';
 
 export const Balance = {
     info: new SlashCommandBuilder()
@@ -52,7 +52,7 @@ export const Balance = {
                     break;
                 }
             }
-            if(!higherUp){
+            if (!higherUp) {
                 interaction.reply('Only officer+ can modify member balances!');
                 return;
             }

@@ -92,11 +92,11 @@ export const DB = {
             console.error('Unable to connect to the database:', error);
         }
     },
-/**
- * sync:
- * Tries to sync all database tables with the database file, 
- * which allows it to build upon the information previously stored in their respective tables after bot resets.
- */
+    /**
+     * sync:
+     * Tries to sync all database tables with the database file, 
+     * which allows it to build upon the information previously stored in their respective tables after bot resets.
+     */
     sync: async (): Promise<void> => {
         try {
             await User.sync();

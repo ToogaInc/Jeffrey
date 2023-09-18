@@ -1,4 +1,4 @@
-import { User, Wallet, GachaInv } from "./JeffreyDB"
+import { User, Wallet, GachaInv } from "../DB/JeffreyDB"
 
 /**
  * Checks if the given userID is in the "User" table.

@@ -1,6 +1,6 @@
-import { JeffreyGachaURLs, displayLegendary } from "../JeffreyGacha";
+import { JeffreyGachaURLs, displayLegendary } from "../DB/JeffreyGacha";
 import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, ChatInputCommandInteraction } from "discord.js";
-import { replyWithEmbed, rng } from '../utils';
+import { replyWithEmbed, rng } from '../utils/miscUtils';
 import {
     addNewGacha,
     findOrAddUserWallet,
@@ -9,7 +9,7 @@ import {
     gachaLvlUp,
     checkGachaLevel,
     checkIfUserHasGachaInv
-} from "../DBUtils";
+} from "../utils/DBUtils";
 
 export const Roll = {
     info: new SlashCommandBuilder()
@@ -35,7 +35,7 @@ export const Roll = {
         }
 
         const price: number = 5;
-        
+
         if (currentBalance < price) {
             await interaction.reply('not enough JeffreyCoins!');
             return;
@@ -76,7 +76,7 @@ export const Roll = {
         }
 
         let embed: EmbedBuilder;
-        
+
         if (raritySelect !== 'Legendary') {
             embed = new EmbedBuilder()
                 .setTitle(`You pulled a **${displayRarity}** Jeffrey!`)

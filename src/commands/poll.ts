@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { NUMBER_EMOJIS } from '../constants/misc';
+import { NUMBER_EMOJIS } from '../constants/miscConstants';
 
 const MAX_CHOICES = 5;
 

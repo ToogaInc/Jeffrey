@@ -8,9 +8,9 @@ import {
     MessageCollector,
     User
 } from 'discord.js';
-import { tryDelete, tryToDMEmbed } from '../utils';
-import { BUTTONS } from '../constants/buttons';
-import { TIME_IN_MS } from '../constants/misc';
+import { tryDelete, tryToDMEmbed } from '../utils/miscUtils';
+import { BUTTONS } from '../constants/buttonConstants';
+import { TIME_IN_MS } from '../constants/miscConstants';
 
 const MAX_CHOICES = 5;
 
