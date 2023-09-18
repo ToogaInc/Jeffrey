@@ -6,14 +6,14 @@ export const sequelize = new Sequelize({
     logging: false,
 });
 
-// Creates the "User" table with:
-// @example (id is Discord user ID, username is Discord Username, display_name is their nickname in that server)
-//
-// | id:'667951424704872450' | username: 'jeffreyhassalide' | display_name: Jeffrey |
+/** Creates the "User" table with:
+* @example (id is Discord user ID, name is Discord Username, display_name is their nickname in that server)
+* | id:'667951424704872450' | name: 'jeffreyhassalide' | display_name: Jeffrey |
+*/
 export class User extends Model {
     declare id: string;
     declare name: string;
-    declare display_name: string;  
+    declare display_name: string;
 }
 User.init({
     id: {
@@ -33,10 +33,10 @@ User.init({
     },
 }, { sequelize });
 
-// Creates the "Wallet" table with
-// @example(id is a unique ID for each row, userid is users Discord ID, balance is how much money they have) 
-// 
-// | id: 5 | userid: 667951424704872450 | balance: 10 |
+/** Creates the "Wallet" table with
+* @example(id is a unique ID for each row, user_id is users Discord ID, balance is how much money they have) 
+* | id: 5 | user_id: 667951424704872450 | balance: 10 |
+*/
 export class Wallet extends Model {
     declare id: number;
     declare user_id: string;
@@ -67,9 +67,10 @@ Wallet.init({
 }, { sequelize });
 User.hasOne(Wallet, { foreignKey: 'user_id', sourceKey: 'id' });
 
-// Creates the "Gacha" table with
-// @example 
-// | id: 8 | link: https://fakelink.png | name: JeffreyDaKilla | description: He gonna scratch you up! |
+/** Creates the "Gacha" table which contains a link, name, description and rarity for each gacha, aswell as a unique number ID for each of them.
+* @example 
+* | id: 8 | link: https://fakelink.png | name: JeffreyDaKilla | description: He gonna scratch you up! | rarity: legendary | 
+*/
 export class Gacha extends Model {
     declare id: number;
     declare link: string;
@@ -106,7 +107,14 @@ Gacha.init({
     },
 }, { sequelize });
 
-export class Collection extends Model{
+/**
+ * Creats 'Collection' table which creates rows with user_id and gacha_id, to show which gachas each user owns,
+ * as well as what level each specific gacha is for that user(level = how many copies they have, caps at 5)
+ * Has a unique number ID for each row.
+ * @example
+ * | id: 25 | user_id: 667951424704872450 | gacha_id: 48 | level: 3 |
+ */
+export class Collection extends Model {
     declare id: number;
     declare user_id: string;
     declare gacha_id: number;
@@ -145,8 +153,8 @@ Collection.init({
         defaultValue: 1,
     },
 }, { sequelize });
-User.hasMany(Collection, {foreignKey: 'user_id', sourceKey: 'id'});
-Gacha.hasMany(Collection, {foreignKey: 'gacha_id', sourceKey: 'id'});
+User.hasMany(Collection, { foreignKey: 'user_id', sourceKey: 'id' });
+Gacha.hasMany(Collection, { foreignKey: 'gacha_id', sourceKey: 'id' });
 
 // Contains'test' and 'sync'
 export const DB = {
@@ -162,11 +170,11 @@ export const DB = {
             console.error('Unable to connect to the database:', error);
         }
     },
-/**
- * sync:
- * Tries to sync all database tables with the database file, 
- * which allows it to build upon the information previously stored in their respective tables after bot resets.
- */
+    /**
+     * sync:
+     * Tries to sync all database tables with the database file, 
+     * which allows it to build upon the information previously stored in their respective tables after bot resets.
+     */
     sync: async (): Promise<void> => {
         try {
             await User.sync();
@@ -174,16 +182,16 @@ export const DB = {
 
             await Wallet.sync();
             console.log('UserWallets synced');
-            
+
             await Gacha.sync();
             console.log('GachaInvs synced');
 
             await Collection.sync()
-            console.log ('Collection sunced');
+            console.log('Collection sunced');
 
-        }catch(e){
-            console.log('Failed to sync table(s)');
-            console.error(e);
+        } catch (err) {
+            console.log();
+            console.error('Failed to sync table(s)', err);
         }
     }
 };

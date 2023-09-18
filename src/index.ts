@@ -5,13 +5,12 @@ import {
   ClientOptions,
   REST,
   Routes,
-  GatewayIntentBits,
-  ChatInputCommandInteraction
+  GatewayIntentBits
 } from 'discord.js';
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
 import { Cat } from './commands/cat';
-import { Wallet } from './commands/balance';
+import { Balance } from './commands/balance';
 import { Poll } from './commands/poll';
 import { Roll } from './commands/roll';
 import { DB } from './JeffreyDB';
@@ -58,7 +57,7 @@ async function main() {
           Mock.info.toJSON(),
           Cat.info.toJSON(),
           Poll.info.toJSON(),
-          Wallet.info.toJSON(),
+          Balance.info.toJSON(),
           Roll.info.toJSON()
         ]
       }
@@ -72,7 +71,7 @@ async function main() {
 Poll.addChoiceOptions();
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
   const { commandName } = interaction;
   const userID = interaction.user.id;
@@ -104,13 +103,13 @@ client.on('interactionCreate', async (interaction) => {
     await Cat.run(interaction);
   }
   if (commandName === 'poll') {
-    await Poll.run(interaction as ChatInputCommandInteraction);
+    await Poll.run(interaction);
   }
   if (commandName === 'balance') {
-    await Wallet.run(interaction as ChatInputCommandInteraction);
+    await Balance.run(interaction);
   }
   if (commandName === 'roll') {
-    await Roll.run(interaction as ChatInputCommandInteraction);
+    await Roll.run(interaction);
   }
 });
 

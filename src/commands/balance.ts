@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
 import { addOrSubtractWallet, findOrAddToUser, checkOrStartWallet } from '../DBMain';
 
-export const Wallet = {
+export const Balance = {
     info: new SlashCommandBuilder()
         .setName('balance')
         .setDescription('Shows you a users JeffreyCoin balance')
@@ -23,7 +23,7 @@ export const Wallet = {
         const member = interaction.options.getUser('member');
         const add = interaction.options.getInteger('add');
 
-        
+
 
         //checks if non-higher up attempted to use the 'add' option
         if (add) {
@@ -48,7 +48,7 @@ export const Wallet = {
                     break;
                 }
             }
-            if(!higherUp){
+            if (!higherUp) {
                 await interaction.reply('Only officer+ can modify member balances!');
                 return;
             }
@@ -88,7 +88,7 @@ export const Wallet = {
         //otherwise, reply with the balance change, then send embed
         try {
             if (!add) {
-                await interaction.reply({embeds: [embed]});
+                await interaction.reply({ embeds: [embed] });
                 return;
             }
             if (add > 0) {

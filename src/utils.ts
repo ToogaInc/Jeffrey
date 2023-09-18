@@ -1,5 +1,5 @@
-import { Message, HexColorString, ActionRowBuilder, ButtonBuilder } from 'discord.js';
-import { BUTTONS as b } from './constants/buttons';
+import { Message, HexColorString } from 'discord.js';
+import { BUTTONS } from './constants/buttons';
 
 export const NUMBER_EMOJIS: string[] = [
     "1⃣",
@@ -13,58 +13,77 @@ export const NUMBER_EMOJIS: string[] = [
     "9⃣",
     "🔟"
 ];
+
 /**
  * Chooses a random number between min and max
- * @param min - the lowest possible number
- * @param max - the highest possible number
+ * @param {number} min - the lowest possible number
+ * @param {number} max - the highest possible number
  * @returns - returns the random number
  */
 export async function rng(min: number, max: number): Promise<number> {
-
     const randomDecimal = Math.random();
-
     const range = max - min + 1;
     const randomNumber = Math.floor(randomDecimal * range + 1) + min;
-
     return randomNumber
-}
+};
 
+/**
+ * Function that takes a rarity and returns the color that the embed for that gacha rarity should be.
+ * 
+ * @param {string} rarity -  the rarity of the gacha to be displayed
+ * @returns {Promise<HexColorString>} - the color(hexadecimal color string) associated with the given rarity
+ */
 export async function getEmbedColor(rarity: string): Promise<HexColorString> {
     let color: HexColorString;
-    if(rarity === 'common') {
+    if (rarity === 'common') {
         color = `#808080`; //grey
-    }else if(rarity === 'uncommon') {
+    } else if (rarity === 'uncommon') {
         color = `#00A36C`; //green
-    }else if (rarity === 'rare') {
+    } else if (rarity === 'rare') {
         color = `#FF69B4`; //pink
-    }else if (rarity === 'legendary') {
+    } else if (rarity === 'legendary') {
         color = `#D4A017`;// orange gold
-    }else{
+    } else {
         color = `#000000` //black (shouldnt show up)
     }
     return color;
-}
+};
 
+/**
+ * Attempts to delete specified message.
+ * 
+ * @param {Message} m -  a discord message
+ * @returns {Promise<boolean>} - Whether or not the message was successfully deleted
+ */
 export async function tryDelete(m: Message): Promise<boolean> {
-    try{
+    try {
         m.delete();
         return true;
-    }catch(err){
+    } catch (err) {
         console.error('could not delete message', err);
         return false;
     }
-}
+};
 
+/**
+ * Function used specifically for situations where the user cycles through 'Next' and 'Previous' buttons.
+ * Checks if next/previous should be disabled or not. 
+ * Previous - disabled if there is no place before it (position 0)
+ * Next - disabled if there is no place above it (current position === max/highest possible position)
+ * 
+ * @param {number} currentPos - The current position in an array/list
+ * @param {number} max - The highest possible position/number
+ */
 export async function checkIfFirstOrLast(currentPos: number, max: number): Promise<void> {
 
     if (max - currentPos <= 1) {
-        b.next.setDisabled(true);
+        BUTTONS.NEXT_BUTTON.setDisabled(true);
     } else {
-        b.next.setDisabled(false);
+        BUTTONS.NEXT_BUTTON.setDisabled(false);
     }
     if (currentPos < 1) {
-        b.previous.setDisabled(true);
+        BUTTONS.PREVIOUS_BUTTON.setDisabled(true);
     } else {
-        b.previous.setDisabled(false);
+        BUTTONS.PREVIOUS_BUTTON.setDisabled(false);
     }
-}
+};

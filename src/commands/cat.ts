@@ -1,12 +1,12 @@
 import axios from 'axios';
-import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 
 export const Cat = {
     info: new SlashCommandBuilder()
         .setName('cat')
         .setDescription('Sends a picture of a cat!'),
 
-    run: async (interaction: CommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
         let catUrl: string;
 
         try {
