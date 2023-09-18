@@ -99,13 +99,13 @@ export const DM = {
             collector.on('collect', async i => {
 
                 if (i.customId === BUTTONS.CANCEL_ID) {
-                    await i.update({});
+                    await i.update({ components: [] });
                     await interaction.editReply({ content: `Process Canceled.`, components: [] });
                     return;
                 }
 
                 else if (i.customId === BUTTONS.YES_ID) {
-                    await i.update({});
+                    await i.update({ components: [] });
                     await sendDMs(message, users);
                     return;
                 }

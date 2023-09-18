@@ -5,8 +5,7 @@ import {
   ClientOptions,
   REST,
   Routes,
-  GatewayIntentBits,
-  ChatInputCommandInteraction
+  GatewayIntentBits
 } from 'discord.js';
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
@@ -32,8 +31,8 @@ const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMembers,
   GatewayIntentBits.GuildMessages,
-  GatewayIntentBits.MessageContent,
-]
+  GatewayIntentBits.MessageContent
+];
 
 const options: ClientOptions = {
   intents: intents,
