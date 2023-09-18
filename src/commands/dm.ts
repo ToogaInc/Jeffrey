@@ -12,7 +12,7 @@ import { tryDelete, tryToDMEmbed } from '../utils';
 import { BUTTONS } from '../constants/buttons';
 import { TIME_IN_MS } from '../constants/misc';
 
-const MAX_CHOICES = 5;
+const MAX_USERS = 5;
 
 export const DM = {
     info: new SlashCommandBuilder()
@@ -27,7 +27,7 @@ export const DM = {
                 .setRequired(false)),
 
     addChoiceOptions: () => {
-        for (let i = 0; i < MAX_CHOICES; i++) {
+        for (let i = 0; i < MAX_USERS; i++) {
             DM.info.addUserOption(option =>
                 option.setName(`user${i + 1}`)
                     .setDescription(`One of the users that will be DM\'d`)
@@ -68,7 +68,7 @@ export const DM = {
         const message = interaction.options.getString('message');
         let users: User[] = [];
         //checks all 'user' options.
-        for (let i = 0; i < MAX_CHOICES; i++) {
+        for (let i = 0; i < MAX_USERS; i++) {
             const getUser = interaction.options.getUser(`user${i + 1}`);
             if (getUser) {
                 users.push(getUser);
@@ -204,7 +204,7 @@ export const DM = {
                         const words = m.content.split(' ');
 
                         for (const currentWord of words) {
-                            if (memberList.length > 4) {
+                            if (memberList.length >= MAX_USERS) {
                                 await interaction.channel?.send(`Sorry, I can only message **5** user's at once!`);
                                 return;
                             }
