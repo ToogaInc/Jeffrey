@@ -1,4 +1,4 @@
-import { CommandInteraction, Message, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, Message, SlashCommandBuilder } from 'discord.js';
 import { mockTargets } from '../index';
 
 export const Mock = {
@@ -10,7 +10,7 @@ export const Mock = {
                 .setDescription('Choose which member you want to be mocked')
                 .setRequired(true)),
 
-    run: async (interaction: CommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
         if (!interaction.guild) { //Checks if the command is NOT done in a server
             await interaction.reply('This command can only be done in a server.');
             return;
@@ -47,6 +47,7 @@ export const Mock = {
         }
         mockTargets.add(target.id);
         await interaction.reply(`Sure thing, I will begin mocking ${target}!`);
+        console.log(`Current Mock list: ${mockTargets}`);
     },
     /**
      * Deletes 'mock' targets message and re-sends it in "sPoNgEbOb" text format
@@ -69,7 +70,6 @@ export const Mock = {
                 shouldBeLower = !shouldBeLower;
             }
         }
-
         // Attempt to delete the original message
         try {
             await message.delete();
@@ -78,7 +78,6 @@ export const Mock = {
             console.log(`ERROR: could not delete ${message.author.username} (${message.author.id}) message in ${message.channel}`);
             return;
         }
-
         // Attempt to send the mocked message
         try {
             await message.channel.send(`${message.author} says "${mockMessage}"`);
