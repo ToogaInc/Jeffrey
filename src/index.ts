@@ -3,7 +3,6 @@ import { config } from 'dotenv';
 import {
   Client,
   ClientOptions,
-  REST,
   GatewayIntentBits
 } from 'discord.js';
 import { Mock } from './commands/mock';

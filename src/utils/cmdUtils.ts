@@ -23,6 +23,9 @@ const CMD_LIST = [
 export async function initCmds(token: string, clientID: string, guildID: string): Promise<void> {
     const rest = new REST({ version: '10' }).setToken(token);
 
+    Poll.addChoiceOptions();
+    DM.addChoiceOptions();
+
     const cmdInfo = CMD_LIST.map(cmd => cmd.info.toJSON());
     await rest.put(
         Routes.applicationGuildCommands(clientID, guildID),
@@ -30,8 +33,6 @@ export async function initCmds(token: string, clientID: string, guildID: string)
             body: cmdInfo
         }
     );
-    Poll.addChoiceOptions();
-    DM.addChoiceOptions();
 };
 
 export async function checkAndRunCommand(interaction: ChatInputCommandInteraction): Promise<void> {
