@@ -204,7 +204,10 @@ export const DM = {
                         const words = m.content.split(' ');
 
                         for (const currentWord of words) {
-
+                            if (memberList.length > 4) {
+                                await interaction.channel?.send(`Sorry, I can only message **5** user's at once!`);
+                                return;
+                            }
                             let member = interaction.guild?.members.cache.find((member) =>
                                 member.user.username === currentWord ||
                                 member.user.displayName === currentWord ||
@@ -235,8 +238,8 @@ export const DM = {
                 }
 
                 else if (i.customId === BUTTONS.DONE_ID) {
-                    msgCollector.stop();
-                    userCollector.stop();
+                    msgCollector?.stop();
+                    userCollector?.stop();
 
                     startEmbed.setTitle('DM User(s)')
                         .setFields(
@@ -256,8 +259,8 @@ export const DM = {
                 }
 
                 else if (i.customId === BUTTONS.BACK_ID) {
-                    msgCollector.stop();
-                    userCollector.stop();
+                    msgCollector?.stop();
+                    userCollector?.stop();
 
                     await i.update({ embeds: [startEmbed], components: [startRow] });
                 }
@@ -346,6 +349,5 @@ export const DM = {
             await interaction.editReply({ content: 'Sent!', embeds: [DMEmbed], components: [] });
             return;
         }
-
     }
 };
