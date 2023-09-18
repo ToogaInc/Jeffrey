@@ -1,6 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, User } from 'discord.js';
-import { checkUser, checkBalance, addOrSubtractBalance, addUser, findOrAddUserWallet } from '../databse/DBUtils';
-import { replyWithEmbed } from '../utilities/miscUtils';
+import { addOrSubtractWallet, findOrAddToUser, checkOrStartWallet } from '../databse/DBMain';
 
 export const Balance = {
     info: new SlashCommandBuilder()
@@ -24,11 +23,7 @@ export const Balance = {
         const member = interaction.options.getUser('member');
         const add = interaction.options.getInteger('add');
 
-        let target: User;
-        let targetBalance: number;
-        let startingBalance: number;
 
-        let higherUp = false;
 
         //checks if non-higher up attempted to use the 'add' option
         if (add) {
@@ -42,6 +37,7 @@ export const Balance = {
 
             const commandUser = await interaction.guild.members.fetch(userID);
 
+            let higherUp = false;
             for (const currentRole of role) {
                 if (!currentRole) {
                     console.log(`ERROR finding higher up role(s) for balance command`);
@@ -53,13 +49,14 @@ export const Balance = {
                 }
             }
             if (!higherUp) {
-                interaction.reply('Only officer+ can modify member balances!');
+                await interaction.reply('Only officer+ can modify member balances!');
                 return;
             }
         }
 
-        //whos(target) balance to check - 
+        // whos balance to check (target) =
         //'member' option if one is specified. Otherwise, defaults to the command user.
+        let target: User;
         if (!member || member.id === userID) {
             target = interaction.user;
         } else {
@@ -67,45 +64,42 @@ export const Balance = {
         }
 
         //checks for target in Users, otherwise adds them
-        const userInUsers = await checkUser(target.id);
-        if (!userInUsers) {
-            await addUser(target.id, target.username);
-        }
-        const userInWallet = await findOrAddUserWallet(target.id);
+        await findOrAddToUser(target.id, target.username, target.displayName);
 
+        const startingBalance = await checkOrStartWallet(target.id);
+        let displayBalance = startingBalance;
         //checks targets current balance, then adds 'add' to it (can be negative)
         if (add !== null) {
-            startingBalance = await checkBalance(target.id);
-            await addOrSubtractBalance(target.id, add);
+            await addOrSubtractWallet(target.id, add);
+            displayBalance += add;
         }
 
-        //checks targets balance
-        targetBalance = await checkBalance(target.id);
-        if (!targetBalance && targetBalance !== 0) {
+        //checks if balance is valid
+        if (!startingBalance && startingBalance !== 0) {
             console.log(`ERROR: ${target.id}'s balance is NULL or undefined.`);
             await interaction.reply('An error has occured, please contact a developer')
         }
 
         const embed = new EmbedBuilder()
             .setAuthor({ name: `${target.displayName}'s Wallet`, iconURL: target.displayAvatarURL() })
-            .addFields({ name: ' ', value: `Balance: ${targetBalance}` });
+            .addFields({ name: ' ', value: `Balance: ${displayBalance}` });
 
         //if no 'add' was specified, reply with embed of balance
         //otherwise, reply with the balance change, then send embed
         try {
             if (!add) {
-                await replyWithEmbed(embed, interaction);
+                await interaction.reply({ embeds: [embed] });
                 return;
             }
-            if (add && add > 0) {
-                await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance!} + ${add} = ${targetBalance})`);
+            if (add > 0) {
+                await interaction.reply(`Added ${add} to ${target}'s wallet! (${startingBalance} + ${add} = ${startingBalance + add})`);
             }
-            if (add && add < 0) {
-                await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance!} - ${add * -1} = ${targetBalance})`);
+            if (add < 0) {
+                await interaction.reply(`Removed ${add * -1} from ${target}'s wallet! (${startingBalance} - ${add * -1} = ${startingBalance + add})`);
             }
             await interaction.channel!.send({ embeds: [embed] });
         } catch {
-            console.log(`ERROR: Failed to send reply and/or embed in ${interaction.channelId}`);
+            console.log(`ERROR: Could not send msg embed in ${interaction.channelId}`);
             return;
         }
     }

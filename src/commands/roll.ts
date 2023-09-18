@@ -1,119 +1,186 @@
-import { JeffreyGachaURLs, displayLegendary } from "../databse/JeffreyGacha";
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, ChatInputCommandInteraction } from "discord.js";
-import { replyWithEmbed, rng } from '../utilities/miscUtils';
 import {
-    addNewGacha,
-    findOrAddUserWallet,
-    addOrSubtractBalance,
-    checkBalance,
-    gachaLvlUp,
+    SlashCommandBuilder,
+    EmbedBuilder,
+    ChatInputCommandInteraction,
+    ButtonBuilder,
+    ActionRowBuilder,
+    ComponentType,
+    Message
+} from "discord.js";
+import {
+    addOrSubtractWallet,
+    addToCollection,
     checkGachaLevel,
-    checkIfUserHasGachaInv
-} from "../databse/DBUtils";
+    checkOrStartWallet
+} from "../databse/DBMain";
+import { rollForGacha } from "../databse/DBUtils";
+import { checkIfFirstOrLast, getEmbedColor, tryDelete } from "../utilities/miscUtils";
+import { BUTTONS } from "../constants/buttonConstants";
+
+let rollAgainInUse = false;
 
 export const Roll = {
     info: new SlashCommandBuilder()
         .setName('roll')
-        .setDescription('Roll for Jeffrey\'s!'),
+        .setDescription('Roll for Jeffrey\'s!')
+        .addIntegerOption(option =>
+            option.setName('number')
+                .setDescription('How many rolls you want to do (costs 10 coins each!)')
+                .setRequired(false)),
 
-    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction, rollingAgain?: number): Promise<void> => {
         if (!interaction.guild) {
             await interaction.reply('this command can only be done in a server');
             return;
         }
 
-        const userID = interaction.user.id;
-
-        await findOrAddUserWallet(userID);
-
-        let currentBalance = await checkBalance(userID);
-
-        if (!currentBalance && currentBalance !== 0) {
-            console.log(`${userID}'s currentBalance is NULL or undefined`);
-            interaction.reply('Failed to check balance, please contact a developer');
-            return;
-        }
-
-        const price: number = 5;
-
-        if (currentBalance < price) {
-            await interaction.reply('not enough JeffreyCoins!');
-            return;
+        let rolls = 1
+        if (rollingAgain && rollingAgain > 0) {
+            rolls = rollingAgain;
         } else {
-            await addOrSubtractBalance(userID, -price);
-            currentBalance -= price;
-        }
-
-        const rndm = await rng(0, 100);
-        let raritySelect: 'Common' | 'Uncommon' | 'Rare' | 'Legendary';
-
-        if (rndm <= 65) {
-            raritySelect = 'Common';
-        } else if (rndm > 65 && rndm <= 90) {
-            raritySelect = 'Uncommon';
-        } else if (rndm > 90 && rndm < 99) {
-            raritySelect = 'Rare';
-        } else if (rndm >= 100) {
-            raritySelect = 'Legendary';
-        } else {
-            console.log('error choosing random rarity for Roll command');
-            return;
-        }
-
-        const rarity = JeffreyGachaURLs[raritySelect];
-        const chooseGacha = await rng(0, rarity.length - 1);
-        const gachaObj = rarity[chooseGacha];
-        const gacha = gachaObj.link;
-
-        const displayRarity = raritySelect.toUpperCase();
-
-        const gachaInv = await checkIfUserHasGachaInv(userID, gacha);
-        if (!gachaInv) {
-            console.log(gacha);
-            await addNewGacha(userID, gacha);
-        } else {
-            await gachaLvlUp(userID, gacha);
-        }
-
-        let embed: EmbedBuilder;
-
-        if (raritySelect !== 'Legendary') {
-            embed = new EmbedBuilder()
-                .setTitle(`You pulled a **${displayRarity}** Jeffrey!`)
-                .setAuthor({ name: `${interaction.user.displayName}` })
-                .setImage(gacha);
-
-        } else {
-            const legendaryInfo = await displayLegendary(gacha);
-
-            if (!legendaryInfo || !legendaryInfo[0] || !legendaryInfo[1]) {
-                console.log(`ERROR: could not find legendaryInfo`);
-                await interaction.reply('Sorry the command could not be completed, please contact a developer.');
-                return;
-            } else {
-                embed = new EmbedBuilder()
-                    .setTitle('YOU PULLED A LEGENDARY JEFFREY!!!')
-                    .setAuthor({ name: `${interaction.user.displayName}` })
-                    .setImage(gacha)
-                    .addFields({ name: `${legendaryInfo[0]}`, value: `${legendaryInfo[1]}` });
+            const checkIfRolls = interaction.options.getInteger('number')
+            if (checkIfRolls) {
+                rolls = checkIfRolls;
             }
         }
 
-        const gachaLevel = await checkGachaLevel(userID, gacha);
-        let starArray = '';
-        if (!gachaLevel) {
-            console.log(`gachaLevel is ${gachaLevel} (NULL)`);
-            await interaction.reply('Sorry the command could not be completed, please contact a developer.')
+        const userID = interaction.user.id;
+        const currentWallet = await checkOrStartWallet(userID);
+
+        const price = 10;
+        const totalPrice = price * rolls;
+        if (currentWallet < totalPrice) {
+            if (rollingAgain) {
+                await interaction.channel?.send('Not enough JeffreyCoins!');
+                return;
+            }
+            await interaction.reply('Not enough JeffreyCoins!');
+            return;
+        } else {
+            await addOrSubtractWallet(userID, -totalPrice);
         }
-        for (let i = 0; i < gachaLevel; i++) {
-            starArray += '⭐';
+        const gacha = await rollForGacha(rolls);
+
+        let gachaLevel: number[] = [];
+        let level: string[] = [];
+        const embeds: EmbedBuilder[] = [];
+
+        //Cycle through all rolls, creates embed for each gacha acquired
+        for (let i = 0; i < rolls; i++) {
+            await addToCollection(userID, gacha[i].id);
+            const getLevel = await checkGachaLevel(userID, gacha[i].id);
+            if (!getLevel) {
+                console.log(`ERROR: Invalid level for - User: ${userID}, Gacha: ${gacha[i].id}`);
+                await interaction.reply('An error has occured, please contact a developer');
+            }
+            gachaLevel.push(getLevel);
+
+            let starArray = '';
+            for (let j = 0; j < gachaLevel[i]; j++) {
+                starArray += '⭐';
+            }
+            let lvlUp = 'Level: ';
+            if (gachaLevel[i] > 1) {
+                lvlUp = '**Rank Up!** | Level: ';
+            }
+            level.push(lvlUp + starArray);
+
+            const color = await getEmbedColor(gacha[i].rarity);
+            const embed = new EmbedBuilder();
+            embed.setTitle(`${gacha[i].name} Jeffrey`)
+                .setDescription(`${gacha[i].description}`)
+                .setImage(gacha[i].link)
+                .setFields({ name: ' ', value: `${level[i]}` })
+                .setColor(color)
+                .setFooter({ text: `${0 + i + 1}/${rolls}` });
+
+            embeds.push(embed);
         }
-        embed.setDescription(starArray);
-        try {
-            await replyWithEmbed(embed!, interaction);
-        } catch {
-            console.log(`ERROR: could not reply with embed in ${interaction.channelId}`);
+
+        if (rolls === 1) {
+            BUTTONS.NEXT_BUTTON.setDisabled(true);
+        }
+        //previous starts disabled
+        const row = new ActionRowBuilder<ButtonBuilder>()
+            .setComponents(BUTTONS.PREVIOUS_BUTTON, BUTTONS.NEXT_BUTTON, BUTTONS.ROLL_AGAIN_BUTTON);
+
+        let currentGacha = 0;
+
+        if (rollingAgain && rollingAgain > 0) {
+            await interaction.channel?.send(`${interaction.user} rolled for ${rolls} Jeffrey(s)!`);
+        } else {
+            await interaction.reply(`${interaction.user} rolled for ${rolls} Jeffrey(s)!`);
+        }
+
+        const gachaMessage = await interaction.channel?.send({
+            content: `**${gacha[currentGacha].rarity.toUpperCase()} JEFFREY**`,
+            embeds: [embeds[currentGacha]],
+            components: [row]
+        });
+
+        if (!gachaMessage) {
+            await interaction.reply('Could not send message embed, please contact a developer');
             return;
         }
+
+        const buttonCollector = gachaMessage.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, componentType: ComponentType.Button, time: 1_800_000 });
+
+        buttonCollector.on('collect', async i => {
+
+            if (i.customId === BUTTONS.NEXT_ID) {
+                currentGacha += 1;
+                await checkIfFirstOrLast(currentGacha, rolls);
+                await i.update({
+                    content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
+                    embeds: [embeds[currentGacha]],
+                    components: [row]
+                });
+            }
+            
+            if (i.customId === BUTTONS.PREVIOUS_ID) {
+                currentGacha -= 1;
+                await checkIfFirstOrLast(currentGacha, rolls);
+                await i.update({
+                    content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
+                    embeds: [embeds[currentGacha]],
+                    components: [row]
+                });
+            }
+
+            if (i.customId === BUTTONS.ROLL_AGAIN_ID) {
+                if (rollAgainInUse) {
+                    await i.update({})
+                    await interaction.channel?.send('Please complete your previous roll again before using this one!');
+                } else {
+                    rollAgainInUse = true;
+                    row.setComponents(BUTTONS.PREVIOUS_BUTTON, BUTTONS.NEXT_BUTTON);
+
+                    await i.update({ components: [row] });
+                    const rollAgainMsg = await interaction.channel?.send(`How many more rolls would you like to do? (Please type a number, type '0' to cancel)`);
+
+                    const msgFilter = (m: Message) => m.author.id === interaction.user.id;
+                    const msgCollector = interaction.channel!.createMessageCollector({ filter: msgFilter, time: 60_000 });
+
+                    msgCollector.on('collect', async m => {
+                        await tryDelete(m);
+                        if (m.content === '0') {
+                            await tryDelete(rollAgainMsg!);
+                            msgCollector.stop();
+                        }
+
+                        const content = m.content;
+                        const parsedNumber = Number(content);
+                        if (!isNaN(parsedNumber)) {
+                            msgCollector.stop();
+                            rollAgainInUse = false;
+                            await Roll.run(interaction, parsedNumber);
+                            return;
+                        } else {
+                            await interaction.channel?.send('Please type a valid number!');
+                        }
+                    });
+                }
+            }
+        });
     }
 };

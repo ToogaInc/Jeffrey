@@ -1,131 +1,90 @@
-
-type GachaURLType = {
-    link: string;
-    name: string;
-    description: string;
-};
 //Object containing the 4 rarities, 'Common', 'Uncommon', 'Rare' and 'Legendary'.
 //Each rarity is an array of gacha objects, containing the link(URL), name and description of all gachas.
-export const JeffreyGachaURLs: { [key: string]: GachaURLType[] } = {
-    Common: [
-        { link: 'https://imgur.com/iSHcsOd.png', name: '', description: '' },
-        { link: 'https://imgur.com/Oyh1TiC.png', name: '', description: '' },
-        { link: 'https://imgur.com/hr1tx64.png', name: '', description: '' },
-        { link: 'https://imgur.com/xQqwrWD.png', name: '', description: '' },
-        { link: 'https://imgur.com/4mrEWuV.png', name: '', description: '' },
-        { link: 'https://imgur.com/cSprAX4.png', name: '', description: '' },
-        { link: 'https://imgur.com/DaCVzq8.png', name: '', description: '' },
-        { link: 'https://imgur.com/Z2LaGwY.png', name: '', description: '' },
-        { link: 'https://imgur.com/mx70oY2.png', name: '', description: '' },
-        { link: 'https://imgur.com/AivmZ0T.png', name: '', description: '' },
-        { link: 'https://imgur.com/6dD6wHv.png', name: '', description: '' },
-        { link: 'https://imgur.com/22niPvw.png', name: '', description: '' },
-        { link: 'https://imgur.com/sqnH5tg.png', name: '', description: '' },
-        { link: 'https://imgur.com/nXo9YbZ.png', name: '', description: '' },
-        { link: 'https://imgur.com/po28ZPo.png', name: '', description: '' },
-        { link: 'https://imgur.com/zEfh9G1.png', name: '', description: '' },
-        { link: 'https://imgur.com/MsftbNA.png', name: '', description: '' },
-        { link: 'https://imgur.com/GJFRw0N.png', name: '', description: '' },
-        { link: 'https://imgur.com/Qgi4yeQ.png', name: '', description: '' },
-        { link: 'https://imgur.com/bpVQ6xz.png', name: '', description: '' },
-        { link: 'https://imgur.com/DdhzNO2.png', name: '', description: '' },
-        { link: 'https://imgur.com/AvqpwfX.png', name: '', description: '' },
-        { link: 'https://imgur.com/RuOtxcv.png', name: '', description: '' },
-        { link: 'https://imgur.com/6WkntdW.png', name: '', description: '' },
-        { link: 'https://imgur.com/40M1KOh.png', name: '', description: '' },
-        { link: 'https://imgur.com/ZtPZZV9.png', name: '', description: '' }
-    ],
-    
-    Uncommon: [
-        { link: 'https://imgur.com/txgkO4S.png', name: '', description: '' },
-        { link: 'https://imgur.com/gqbRfhW.png', name: '', description: '' },
-        { link: 'https://imgur.com/qYIxVan.png', name: '', description: '' },
-        { link: 'https://imgur.com/KBwG10J.png', name: '', description: '' },
-        { link: 'https://imgur.com/dord5jv.png', name: '', description: '' },
-        { link: 'https://imgur.com/WGDO515.png', name: '', description: '' },
-        { link: 'https://imgur.com/JujU88m.png', name: '', description: '' },
-        { link: 'https://imgur.com/6ur3hgK.png', name: '', description: '' },
-        { link: 'https://imgur.com/J1Ozvgw.png', name: '', description: '' },
-        { link: 'https://imgur.com/DQDZFjA.png', name: '', description: '' },
-        { link: 'https://imgur.com/15p7sDo.png', name: '', description: '' },
-        { link: 'https://imgur.com/ASOaLa7.png', name: '', description: '' },
-        { link: 'https://imgur.com/kSo1xYB.png', name: '', description: '' },
-        { link: 'https://imgur.com/vWkhS1P.png', name: '', description: '' },
-        { link: 'https://imgur.com/FirGg1T.png', name: '', description: '' },
-        { link: 'https://imgur.com/WVAcNOm.png', name: '', description: '' },
-        { link: 'https://imgur.com/57yMtrl.png', name: '', description: '' },
-        { link: 'https://imgur.com/j00IjET.png', name: '', description: '' },
-        { link: 'https://imgur.com/DnWGWJS.png', name: '', description: '' },
-        { link: 'https://imgur.com/OqOol5X.png', name: '', description: '' },
-        { link: 'https://imgur.com/xryAFJi.png', name: '', description: '' },
-        { link: 'https://imgur.com/WYGcMzt.png', name: '', description: '' },
-        { link: 'https://imgur.com/jhIC3Js.png', name: '', description: '' },
-        { link: 'https://imgur.com/Qh7TDY3.png', name: '', description: '' },
-        { link: 'https://imgur.com/NaKE5Y2.png', name: '', description: '' },
-        { link: 'https://imgur.com/M2wJBt9.png', name: '', description: '' },
-        { link: 'https://imgur.com/voMHJ9n.png', name: '', description: '' },
-        { link: 'https://imgur.com/z81zoZ9.png', name: '', description: '' },
-        { link: 'https://imgur.com/mQB4xHr.png', name: '', description: '' }
-    ],
-    
-    Rare: [
-        { link: 'https://imgur.com/eNx2Ntg.png', name: '', description: '' },
-        { link: 'https://imgur.com/moIgaas.png', name: '', description: '' },
-        { link: 'https://imgur.com/M2wJBt9.png', name: '', description: '' },
-        { link: 'https://imgur.com/NaKE5Y2.png', name: '', description: '' },
-        { link: 'https://imgur.com/KBwG10J.png', name: '', description: '' },
-        { link: 'https://imgur.com/D1cuR7k.png', name: '', description: '' },
-        { link: 'https://imgur.com/rt6lIPt.png', name: '', description: '' },
-        { link: 'https://imgur.com/vvWZ384.png', name: '', description: '' },
-        { link: 'https://imgur.com/UFNSYrP.png', name: '', description: '' },
-        { link: 'https://imgur.com/CKfOGtA.png', name: '', description: '' },
-        { link: 'https://imgur.com/dVGsAIo.png', name: '', description: '' },
-        { link: 'https://imgur.com/JujU88m.png', name: '', description: '' },
-        { link: 'https://imgur.com/KnTrE2e.png', name: '', description: '' },
-        { link: 'https://imgur.com/yjh3yZg.png', name: '', description: '' },
-        { link: 'https://imgur.com/BbtiZwy.png', name: '', description: '' },
-        { link: 'https://imgur.com/LijfPss.png', name: '', description: '' },
-        { link: 'https://imgur.com/GnnuMI5.png', name: '', description: '' },
-        { link: 'https://imgur.com/eGPRhm5.png', name: '', description: '' },
-        { link: 'https://imgur.com/l8uOmAq.png', name: '', description: '' }
-    ],  
-      
-    Legendary: [
-        { link: 'https://imgur.com/miHJetv.png', name: 'Radiant Jeffrey', description: 'Our Lord and Savior Jeffrey' },
-        { link: 'https://imgur.com/tbS4faL.png', name: 'Radiant Jeffrey', description: 'OK FINE ILL FEED YOU NOW!' },
-        { link: 'https://imgur.com/5QfM3zQ.png', name: 'Dead Jeffrey', description: 'RIP. Fly high king' },
-        { link: 'https://imgur.com/xhWXOIA.png', name: 'Box Jeffrey', description: 'Wow, soooo original Jeffrey. Never seen a cat do THAT before.' },
-        { link: 'https://imgur.com/okvejbp.png', name: 'Disturbed Jeffrey', description: 'I don\'t think he\'s a fan...' },
-        { link: 'https://imgur.com/sdLYctZ.png', name: 'Cuddle Jeffrey', description: 'Wittle Cutie!' },
-        { link: 'https://imgur.com/CYvTDSC.png', name: 'Not Jeffrey', description: 'Hey, that\'s not Jeffrey!' },
-        { link: 'https://imgur.com/jmKtrlf.png', name: 'Peaceful Jeffrey', description: 'That\'s about as peacful as its gonna get...' },
-        { link: 'https://imgur.com/Y1i2gMP.png', name: 'Attack Jeffrey', description: 'That bite\'s lethal!' },
-        { link: 'https://imgur.com/3aWCqqe.png', name: 'Caught Jeffrey', description: 'Hey, what going on over here!' },
-        { link: 'https://imgur.com/eTGaGLM.png', name: 'Lap-Cat Jeffrey', description: 'He\'s been know to peruse a lap or two.' },
-        { link: 'https://imgur.com/7YdKWjS.png', name: 'GateKeeper Jeffrey', description: 'Come on Jeffrey, that\'s not very nice!' }
-    ]
-    
-}
-/**
- * Takes a Legendary gacha URL and returns an array containing the link(url), name and description of that gacha.
- * 
- * @param {string} gacha - A Legendary gacha image URL 
- * @returns {string[]} - gachaInfo, contains legendary info (link, name and description)
- */
-export async function displayLegendary(gacha: string): Promise<string[] | null> { 
-    const legendary = JeffreyGachaURLs['Legendary'];
-    for(let i = 0; i < legendary.length; i++){
-        if(legendary[i].link === gacha){
-            const gachaInfo = [
-                legendary[i].name,
-                legendary[i].name,
-                legendary[i].description
-            ];
-            console.log(gachaInfo);
-            return gachaInfo;
-        }
-    }
-    return null;
-}
 
+export const GACHA_URL_LIST = [
+        { link: 'https://imgur.com/Oyh1TiC.png', name: 'Prepared', description: 'He\'s comfy, but not *too* comfy...', rarity: 'common' },
+        { link: 'https://imgur.com/hr1tx64.png', name: 'Soul Stare', description: 'Those tiny pupil\'s can see your true intentions.', rarity: 'common' },
+        { link: 'https://imgur.com/xQqwrWD.png', name: 'Blue Blanket', description: 'He prefers the softer, cozier douvet, but grandma\'s quilt will do.', rarity: 'common' },
+        { link: 'https://imgur.com/4mrEWuV.png', name: 'You Can Leave Now', description: '\"Let me get some rest, Human!\"', rarity: 'common' },
+        { link: 'https://imgur.com/iSHcsOd.png', name: 'Doesn\'t Notice', description: 'This silly billy doesn\'t even know we\'re here!', rarity: 'common' },
+        { link: 'https://imgur.com/cSprAX4.png', name: 'Tail-Pillow', description: 'A multi-purpose apendage! (let\'s pretend he isn\'t using his paws)', rarity: 'common' },
+        { link: 'https://imgur.com/DaCVzq8.png', name: 'Skyblock', description: 'He wants to try!', rarity: 'common' },
+        { link: 'https://imgur.com/Z2LaGwY.png', name: 'Sweet', description: 'Get it? Cuz of the sugarcane? Yeah, im not getting lazy with these, im just clever.', rarity: 'common' },
+        { link: 'https://imgur.com/mx70oY2.png', name: 'Are You Even Listening', description: '\"FOCUS ON ME HUMAN\"', rarity: 'common' },
+        { link: 'https://imgur.com/AivmZ0T.png', name: 'Bed-Head', description: 'Man, he looks rough.', rarity: 'common' },
+        { link: 'https://imgur.com/6dD6wHv.png', name: 'Daring', description: 'He made the jump (probably)', rarity: 'common' },
+        { link: 'https://imgur.com/sqnH5tg.png', name: 'Strategic', description: 'He could build a much better empire.', rarity: 'common' },
+        { link: 'https://imgur.com/nXo9YbZ.png', name: 'Living On The Edge', description: 'He does this way too often.', rarity: 'common' },
+        { link: 'https://imgur.com/po28ZPo.png', name: 'Attack On', description: 'The green thing is an AOT cloak (it\'s *very* soft).', rarity: 'common' },
+        { link: 'https://imgur.com/zEfh9G1.png', name: 'Laundry', description: 'Silly Jeffrey, you aren\'t clothes!', rarity: 'common' },
+        { link: 'https://imgur.com/MsftbNA.png', name: 'Red Blanket', description: 'That\'s won tiewd wittuwl meow meow.', rarity: 'common' },
+        { link: 'https://imgur.com/GJFRw0N.png', name: 'Spot-Stealing', description: '\"Oh, was someone sitting here?\"', rarity: 'common' },
+        { link: 'https://imgur.com/Qgi4yeQ.png', name: 'Desk Bed', description: 'The first picture of Jeffrey on the desk-bed! (at least, while its on the desk)', rarity: 'common' },
+        { link: 'https://imgur.com/bpVQ6xz.png', name: 'Coat', description: 'My sister wasn\'t too happy when I showed her this one.', rarity: 'common' },
+        { link: 'https://imgur.com/DdhzNO2.png', name: 'TV-Time', description: 'His favourite position for watching TV with us! (The tv is directly behind him...)', rarity: 'common' },
+        { link: 'https://imgur.com/AvqpwfX.png', name: 'Severed Head', description: 'At least he still has his best feature\'s!', rarity: 'common' },
+        { link: 'https://imgur.com/RuOtxcv.png', name: 'Dog Bed', description: 'Wrong bed silly, that one\'s way too big!', rarity: 'common' },
+        { link: 'https://imgur.com/6WkntdW.png', name: 'Morning Selfie', description: 'Not his best look.', rarity: 'common' },
+        { link: 'https://imgur.com/40M1KOh.png', name: 'Lean-Back', description: 'What a strange sleeping positon.', rarity: 'common' },
+        { link: 'https://imgur.com/ZtPZZV9.png', name: 'Itchy-Ear', description: 'They say this is the only picture in existence of Jeffrey scratching his ear!', rarity: 'common' },
+
+        { link: 'https://imgur.com/txgkO4S.png', name: 'Shower', description: 'Would be a shame if I were to...', rarity: 'uncommon' },
+        { link: 'https://imgur.com/gqbRfhW.png', name: 'Cats Only', description: '\"No Humans allowed.\"', rarity: 'uncommon' },
+        { link: 'https://imgur.com/qYIxVan.png', name: 'Bunker', description: 'With his perfect defense, he\'s ready to attack!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/dord5jv.png', name: 'Sunglass', description: '\"Hey Human, can you buy me some sunglasses?\"', rarity: 'uncommon' },
+        { link: 'https://imgur.com/WGDO515.png', name: 'Superior', description: '\"I am higher than you, so I am better than you.\"', rarity: 'uncommon' },
+        { link: 'https://imgur.com/6ur3hgK.png', name: 'Photo Pose', description: 'Does he think he\'s in a photoshoot or something?', rarity: 'uncommon' },
+        { link: 'https://imgur.com/J1Ozvgw.png', name: 'I\'ve Been Waiting', description: '\"What took you so long?\"', rarity: 'uncommon' },
+        { link: 'https://imgur.com/DQDZFjA.png', name: 'Oops, You Blinked!', description: 'Come on Jeffrey, you have to keep your eye\'s open!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/15p7sDo.png', name: 'Basement Time?', description: '\"Human, we shall explore the basement.\"', rarity: 'uncommon' },
+        { link: 'https://imgur.com/ASOaLa7.png', name: 'Scenic View', description: 'Jeffrey thought this would be the perfect place for a picture!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/kSo1xYB.png', name: 'On The Freezer', description: 'It turns out freezers can actually emit heat!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/vWkhS1P.png', name: 'Ceiling', description: 'This might be the highest he\'s ever been!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/FirGg1T.png', name: 'Recon Tower', description: 'He\'ll let us know if he see\'s anything. Probably...', rarity: 'uncommon' },
+        { link: 'https://imgur.com/WVAcNOm.png', name: 'Linen Closet', description: 'My mom was not impressed.', rarity: 'uncommon' },
+        { link: 'https://imgur.com/57yMtrl.png', name: 'Flower', description: 'Jeffrey\'s the REAL flower!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/j00IjET.png', name: 'Blurry Carpet', description: 'He\'ll sleep anywhere, and in any quality!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/DnWGWJS.png', name: 'Peak-At', description: 'Look at his cute little face under the monitor!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/OqOol5X.png', name: 'Trap', description: 'I wouldn\'t try to pet him right now...', rarity: 'uncommon' },
+        { link: 'https://imgur.com/xryAFJi.png', name: 'Heater', description: 'CAT CRAVE HEAT', rarity: 'uncommon' },
+        { link: 'https://imgur.com/WYGcMzt.png', name: 'Face-Cover', description: 'A make-shift light blocker!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/jhIC3Js.png', name: 'Arching', description: 'Jeffrey knows he\'s not suppose to be on the table, but he\'s playing it cool.', rarity: 'uncommon' },
+        { link: 'https://imgur.com/Qh7TDY3.png', name: 'Pixel', description: 'Low quality, but still cute!', rarity: 'uncommon' },
+        { link: 'https://imgur.com/voMHJ9n.png', name: 'Pillow', description: 'Kind of a weird spot, but ok Jeffrey.', rarity: 'uncommon' },
+        { link: 'https://imgur.com/z81zoZ9.png', name: 'Alert', description: 'A very young and very alert Jeffrey.', rarity: 'uncommon' },
+        { link: 'https://imgur.com/mQB4xHr.png', name: 'Cat House', description: 'His first cat house (and my phones lockscreen).', rarity: 'uncommon' },
+
+        { link: 'https://imgur.com/eNx2Ntg.png', name: 'Snickering', description: 'I know he\'s actually just sleeping, but I can pretend.', rarity: 'rare' },
+        { link: 'https://imgur.com/moIgaas.png', name: 'Calm Collar', description: 'It didn\'t work very well, Jeffrey and Kitty still hated eachother.', rarity: 'rare' },
+        { link: 'https://imgur.com/M2wJBt9.png', name: 'Birthday Party', description: 'He loves baloons!', rarity: 'rare' },
+        { link: 'https://imgur.com/NaKE5Y2.png', name: 'Weird', description: 'What a strange little creature!', rarity: 'rare' },
+        { link: 'https://imgur.com/KBwG10J.png', name: 'Pillowcase', description: 'That pillow fell on the floor overnight.', rarity: 'rare' },
+        { link: 'https://imgur.com/D1cuR7k.png', name: 'BOX - Kitty vs', description: 'I wonder if they know...', rarity: 'rare' },
+        { link: 'https://imgur.com/rt6lIPt.png', name: 'DOUBLE BED - Kitty vs', description: 'A bed on a bed? Jeffrey wants it!', rarity: 'rare' },
+        { link: 'https://imgur.com/vvWZ384.png', name: 'MIRRIORED - Kitty vs', description: '\"She\'s right behind me, isn\'t she?\"', rarity: 'rare' },
+        { link: 'https://imgur.com/UFNSYrP.png', name: 'TV - Kitty vs', description: 'They just can\'t agree on what to watch!', rarity: 'rare' },
+        { link: 'https://imgur.com/CKfOGtA.png', name: 'STARE - Kitty vs', description: 'Kitty\'s staring daggers at our boy!', rarity: 'rare' },
+        { link: 'https://imgur.com/dVGsAIo.png', name: 'WATER BOTTLE - Kitty vs', description: 'So, is the water bottle actually doing anything here?', rarity: 'rare' },
+        { link: 'https://imgur.com/JujU88m.png', name: 'Box + Boxes', description: 'Jeffrey does love his boxes!', rarity: 'rare' },
+        { link: 'https://imgur.com/KnTrE2e.png', name: 'TOWERS - Kitty vs', description: 'A very common scene, that usually led to the same outcome... destruction.', rarity: 'rare' },
+        { link: 'https://imgur.com/yjh3yZg.png', name: 'Box Trap', description: 'He\'s ready for shipment!', rarity: 'rare' },
+        { link: 'https://imgur.com/BbtiZwy.png', name: 'From Above', description: 'It\'s over Jeffrey, I have the high ground!', rarity: 'rare' },
+        { link: 'https://imgur.com/LijfPss.png', name: 'Back Window', description: 'I feel like this shouldn\'t be named that...', rarity: 'rare' },
+        { link: 'https://imgur.com/GnnuMI5.png', name: 'Aww', description: 'This picture speaks for itself!', rarity: 'rare' },
+        { link: 'https://imgur.com/eGPRhm5.png', name: 'First Cat Bed', description: 'We didn\'t even tell him it was his yet!', rarity: 'rare' },
+        { link: 'https://imgur.com/l8uOmAq.png', name: 'Father', description: 'Jeffrey\'s the new Dad!', rarity: 'rare' },
+
+        { link: 'https://imgur.com/miHJetv.png', name: 'Radiant', description: 'Our Lord and Savior Jeffrey', rarity: 'legendary' },
+        { link: 'https://imgur.com/tbS4faL.png', name: 'Cannibal', description: 'OK FINE ILL FEED YOU NOW!', rarity: 'legendary' },
+        { link: 'https://imgur.com/5QfM3zQ.png', name: 'Dead', description: 'RIP. Fly high king', rarity: 'legendary' },
+        { link: 'https://imgur.com/xhWXOIA.png', name: 'Box', description: 'Wow, soooo original Jeffrey. Never seen a cat do THAT before.', rarity: 'legendary' },
+        { link: 'https://imgur.com/okvejbp.png', name: 'Disturbed', description: 'I don\'t think he\'s a fan...', rarity: 'legendary' },
+        { link: 'https://imgur.com/sdLYctZ.png', name: 'Cuddle', description: 'Wittle Cutie!', rarity: 'legendary' },
+        { link: 'https://imgur.com/CYvTDSC.png', name: 'Not', description: 'Hey, that\'s not Jeffrey!', rarity: 'legendary' },
+        { link: 'https://imgur.com/jmKtrlf.png', name: 'Peaceful', description: 'That\'s about as peaceful as its gonna get...', rarity: 'legendary' },
+        { link: 'https://imgur.com/Y1i2gMP.png', name: 'Attack', description: 'That bite\'s lethal!', rarity: 'legendary' },
+        { link: 'https://imgur.com/3aWCqqe.png', name: 'Caught', description: 'Hey, what\'s going on over here!', rarity: 'legendary' },
+        { link: 'https://imgur.com/eTGaGLM.png', name: 'Lap-Cat', description: 'He\'s been known to peruse a lap or two.', rarity: 'legendary' },
+        { link: 'https://imgur.com/7YdKWjS.png', name: 'GateKeeper', description: 'Come on Jeffrey, that\'s not very nice!', rarity: 'legendary' }
+];
 

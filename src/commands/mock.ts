@@ -1,4 +1,4 @@
-import { CommandInteraction, Message, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, Message, SlashCommandBuilder } from 'discord.js';
 import { mockTargets } from '../index';
 
 export const Mock = {
@@ -10,7 +10,7 @@ export const Mock = {
                 .setDescription('Choose which member you want to be mocked')
                 .setRequired(true)),
 
-    run: async (interaction: CommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
         if (!interaction.guild) { //Checks if the command is NOT done in a server
             await interaction.reply('This command can only be done in a server.');
             return;
