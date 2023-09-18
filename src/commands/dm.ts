@@ -1,18 +1,18 @@
-import { 
-ChatInputCommandInteraction, 
-SlashCommandBuilder, 
-EmbedBuilder, 
-ActionRowBuilder, 
-ButtonBuilder, 
-ButtonStyle, 
-ComponentType, 
-MessageCollector, 
-User 
+import {
+    ChatInputCommandInteraction,
+    SlashCommandBuilder,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ComponentType,
+    MessageCollector,
+    User
 } from 'discord.js';
 import { tryDelete, tryToDMEmbed } from '../utils';
-import { BUTTONS as b} from '../constants/buttons';
+import { BUTTONS } from '../constants/buttons';
+import { TIME_IN_MS } from '../constants/misc';
 
-const MAX_CHOICES = 15;
+const MAX_CHOICES = 5;
 
 export const DM = {
     info: new SlashCommandBuilder()
@@ -42,17 +42,13 @@ export const DM = {
         const userID = interaction.user.id;
 
         let higherUp = false;
-
         const getRole = interaction.guild.roles.cache;
-
         const role = [
             getRole.find(role => role.name.toLowerCase() === 'moderator'),
             getRole.find(role => role.name.toLowerCase() === 'officer'),
             getRole.find(role => role.name.toLowerCase() === 'head raid leader')
         ];
-
         const commandUser = await interaction.guild.members.fetch(userID);
-
         for (const currentRole of role) {
             if (!currentRole) {
                 console.log(`ERROR finding higher up role(s) for balance command`);
@@ -85,24 +81,30 @@ export const DM = {
                 .setDescription(`**Are you sure you want to send this message to these users?**`)
                 .setFields(
                     { name: '__Message Recipients:__ ', value: users.join(', ') },
-                    { name: '__Current Message:__ ', value: message });
+                    { name: '__Current Message:__ ', value: message }
+                );
 
             //confirmation action row with buttons
             const row = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(b.cancel, b.yes);
+                .setComponents(BUTTONS.CANCEL_BUTTON, BUTTONS.YES_BUTTON);
 
             const embedMessage = await interaction.reply({ content: `Please read over the following:`, embeds: [embed], components: [row] });
 
-            const collector = embedMessage.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, componentType: ComponentType.Button, time: 60_000 });
+            const collector = embedMessage.createMessageComponentCollector({
+                filter: i => i.user.id === interaction.user.id,
+                componentType: ComponentType.Button,
+                time: TIME_IN_MS.TEN_MINUTES
+            });
 
             collector.on('collect', async i => {
-                if (i.customId === 'cancel') {
+
+                if (i.customId === BUTTONS.CANCEL_ID) {
                     await i.update({});
                     await interaction.editReply({ content: `Process Canceled.`, components: [] });
                     return;
                 }
 
-                else if (i.customId === 'yes') {
+                else if (i.customId === BUTTONS.YES_ID) {
                     await i.update({});
                     await sendDMs(message, users);
                     return;
@@ -133,15 +135,16 @@ export const DM = {
                 .setDescription('Please type the names of the users you\'d like me to DM!');
 
             const startRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(b.cancel, b.addMessage, b.addUsers, b.send);
+                .setComponents(BUTTONS.CANCEL_BUTTON, BUTTONS.ADD_MESSAGE_BUTTON, BUTTONS.ADD_USERS_BUTTON, BUTTONS.SEND_BUTTON);
 
             const addMsgRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(b.back, b.done);
+                .setComponents(BUTTONS.BACK_BUTTON, BUTTONS.DONE_BUTTON);
+
             const addUsersRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(b.back, b.done, b.reset);
+                .setComponents(BUTTONS.BACK_BUTTON, BUTTONS.DONE_BUTTON, BUTTONS.RESET_BUTTON);
 
             const confirmRow = new ActionRowBuilder<ButtonBuilder>()
-                .setComponents(b.back, b.yes);
+                .setComponents(BUTTONS.BACK_BUTTON, BUTTONS.YES_BUTTON);
 
 
             const embedMessage = await interaction.reply({ content: 'Please follow the instructions below!', embeds: [startEmbed], components: [startRow] });
@@ -151,21 +154,26 @@ export const DM = {
                 return;
             }
 
-            const buttonCollector = embedMessage.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, componentType: ComponentType.Button, time: 60_000 });
+            const buttonCollector = embedMessage.createMessageComponentCollector({
+                filter: i => i.user.id === interaction.user.id,
+                componentType: ComponentType.Button,
+                time: TIME_IN_MS.TEN_MINUTES
+            });
 
             let msgCollector: MessageCollector;
             let userCollector: MessageCollector;
             let memberList: User[] = [];
             let DM = '';
+            const msgTooLong = '**__Message too long! (limit: 1024 characters)__**';
 
             buttonCollector.on('collect', async i => {
 
-                if (i.customId === 'add_message') {
+                if (i.customId === BUTTONS.ADD_MESSAGE_ID) {
                     await i.update({ embeds: [addMsgEmbed], components: [addMsgRow] })
 
                     msgCollector = interaction.channel!.createMessageCollector({
                         filter: (m) => m.author.id === userID,
-                        time: 60_000,
+                        time: TIME_IN_MS.THIRTY_MINUTES,
                     });
 
                     msgCollector.on('collect', async m => {
@@ -173,7 +181,7 @@ export const DM = {
                         if (m.content) {
                             DM = m.content;
                             if (DM.length > 1024) {
-                                DM = '**__Message too long! (limit: 1024 characters)__**';
+                                DM = msgTooLong;
                             }
                             addMsgEmbed.setFields({ name: '__Current Message:__ ', value: DM });
                         } else {
@@ -183,12 +191,12 @@ export const DM = {
                     });
                 }
 
-                else if (i.customId === 'add_users') {
+                else if (i.customId === BUTTONS.ADD_USERS_ID) {
                     await i.update({ embeds: [addUsersEmbed], components: [addUsersRow] });
 
                     userCollector = interaction.channel!.createMessageCollector({
                         filter: (m) => m.author.id === userID,
-                        time: 60_000,
+                        time: TIME_IN_MS.TEN_MINUTES,
                     });
 
                     userCollector.on('collect', async m => {
@@ -220,15 +228,15 @@ export const DM = {
                     });
                 }
 
-                else if (i.customId === 'cancel') {
+                else if (i.customId === BUTTONS.CANCEL_ID) {
                     await interaction.editReply({ content: 'Process canceled', components: [] });
                     console.log('Stopped all Collectors');
                     return;
                 }
 
-                else if (i.customId === 'done') {
-                    msgCollector?.stop();
-                    userCollector?.stop();
+                else if (i.customId === BUTTONS.DONE_ID) {
+                    msgCollector.stop();
+                    userCollector.stop();
 
                     startEmbed.setTitle('DM User(s)')
                         .setFields(
@@ -239,7 +247,7 @@ export const DM = {
                     if (memberList.length > 0) {
                         startEmbed.addFields({ name: '__Message Recipients:__ ', value: memberList.join(', ') });
                     }
-                    if (DM.length > 0 && DM !== '**__Message too long! (limit: 4096 characters)__**') {
+                    if (DM.length > 0 && DM !== msgTooLong) {
                         startEmbed.addFields({ name: '__Current Message:__ ', value: DM });
                     }
 
@@ -247,14 +255,14 @@ export const DM = {
                     await i.update({});
                 }
 
-                else if (i.customId === 'back') {
-                    msgCollector?.stop();
-                    userCollector?.stop();
+                else if (i.customId === BUTTONS.BACK_ID) {
+                    msgCollector.stop();
+                    userCollector.stop();
 
                     await i.update({ embeds: [startEmbed], components: [startRow] });
                 }
 
-                else if (i.customId === 'reset') {
+                else if (i.customId === BUTTONS.RESET_ID) {
                     memberList.length = 0;
                     addUsersEmbed.setDescription('Please type the names of the user(s) you\'d like me to DM!');
                     addUsersEmbed.spliceFields(0, 1);
@@ -262,7 +270,7 @@ export const DM = {
                     await interaction.editReply({ embeds: [addUsersEmbed] });
                 }
 
-                else if (i.customId === 'send') {
+                else if (i.customId === BUTTONS.SEND_ID) {
                     if (!DM || memberList.length < 1) {
                         await interaction.channel?.send(`No message/no user specified!`);
                         await i.update({})
@@ -275,7 +283,7 @@ export const DM = {
                         await interaction.editReply({ embeds: [startEmbed], components: [confirmRow] });
                         await i.update({ components: [confirmRow] });
                     }
-                } else if (i.customId === 'yes') {
+                } else if (i.customId === BUTTONS.YES_ID) {
                     buttonCollector.stop();
                     await i.update({})
                     await sendDMs(DM, memberList);
@@ -287,11 +295,10 @@ export const DM = {
          * Attempts to send specified message to all specified users.
          * 
          * @param {string} m - The message that is to be sent to all users 
-         * @param {User[]}users - Object array of all specified discord users. 
+         * @param {User[]} users - Object array of all specified discord users. 
          */
         async function sendDMs(m: string, users: User[]): Promise<void> {
             const DMEmbed = new EmbedBuilder()
-
                 .addFields(
                     { name: '__Message Content:__ ', value: m },
                     { name: ' ', value: '--END--' },
@@ -301,7 +308,6 @@ export const DM = {
                     },
                 )
                 .setColor('#8B0000');
-
             //tries to get the server icon
             const serverIcon = interaction.guild?.iconURL();
             if (serverIcon) {

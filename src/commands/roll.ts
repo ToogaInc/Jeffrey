@@ -1,5 +1,5 @@
 import { JeffreyGachaURLs, displayLegendary } from "../JeffreyGacha";
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder } from "discord.js";
+import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, ChatInputCommandInteraction } from "discord.js";
 import { replyWithEmbed, rng } from '../utils';
 import {
     addNewGacha,
@@ -16,7 +16,7 @@ export const Roll = {
         .setName('roll')
         .setDescription('Roll for Jeffrey\'s!'),
 
-    run: async (interaction: CommandInteraction): Promise<void> => {
+    run: async (interaction: ChatInputCommandInteraction): Promise<void> => {
         if (!interaction.guild) {
             await interaction.reply('this command can only be done in a server');
             return;

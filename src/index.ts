@@ -77,7 +77,7 @@ async function main() {
 }
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
   const { commandName } = interaction;
   const userID = interaction.user.id;
@@ -109,16 +109,16 @@ client.on('interactionCreate', async (interaction) => {
     await Cat.run(interaction);
   }
   if (commandName === 'poll') {
-    Poll.run(interaction as ChatInputCommandInteraction);
+    Poll.run(interaction);
   }
   if (commandName === 'balance') {
-    await Balance.run(interaction as ChatInputCommandInteraction);
+    await Balance.run(interaction);
   }
   if (commandName === 'roll') {
     await Roll.run(interaction);
   }
   if (commandName === 'dm') {
-    await DM.run(interaction as ChatInputCommandInteraction);
+    await DM.run(interaction);
   }
 });
 
