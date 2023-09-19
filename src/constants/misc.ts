@@ -11,7 +11,7 @@ export const NUMBER_EMOJIS: string[] = [
     "🔟"
 ];
 
-export const TIME_IN_MS =  {
+export const TIME_IN_MS = {
     ONE_MINUTE: 60_000,
     TEN_MINUTES: 600_000,
     THIRTY_MINUTES: 1_800_000,
