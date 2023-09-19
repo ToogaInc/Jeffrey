@@ -11,11 +11,13 @@ import {
     addOrSubtractWallet,
     addToCollection,
     checkGachaLevel,
-    checkOrStartWallet
+    checkOrStartWallet,
+    findOrAddToUser
 } from "../DBMain";
 import { rollForGacha } from "../DBUtils";
 import { checkIfFirstOrLast, getEmbedColor, tryDelete } from "../utils";
 import { BUTTONS } from "../constants/buttons";
+import { TIME_IN_MS } from "../constants/misc";
 
 let rollAgainInUse = false;
 
@@ -38,6 +40,7 @@ export const Roll = {
         if (rollingAgain && rollingAgain > 0) {
             rolls = rollingAgain;
         } else {
+            await interaction.deferReply();
             const checkIfRolls = interaction.options.getInteger('number')
             if (checkIfRolls) {
                 rolls = checkIfRolls;
@@ -45,6 +48,7 @@ export const Roll = {
         }
 
         const userID = interaction.user.id;
+        await findOrAddToUser(userID, interaction.user.username, interaction.user.displayName);
         const currentWallet = await checkOrStartWallet(userID);
 
         const price = 10;
@@ -96,21 +100,25 @@ export const Roll = {
 
             embeds.push(embed);
         }
-
-        if (rolls === 1) {
-            BUTTONS.NEXT_BUTTON.setDisabled(true);
-        }
-        //previous starts disabled
-        const row = new ActionRowBuilder<ButtonBuilder>()
-            .setComponents(BUTTONS.PREVIOUS_BUTTON, BUTTONS.NEXT_BUTTON, BUTTONS.ROLL_AGAIN_BUTTON);
-
         let currentGacha = 0;
 
         if (rollingAgain && rollingAgain > 0) {
             await interaction.channel?.send(`${interaction.user} rolled for ${rolls} Jeffrey(s)!`);
         } else {
-            await interaction.reply(`${interaction.user} rolled for ${rolls} Jeffrey(s)!`);
+            await interaction.editReply(`${interaction.user} rolled for ${rolls} Jeffrey(s)!`);
         }
+        if (rolls === 1) {
+            BUTTONS.NEXT_BUTTON.setDisabled(true);
+        } else {
+            BUTTONS.NEXT_BUTTON.setDisabled(false);
+        }
+        //previous starts disabled
+        const row = new ActionRowBuilder<ButtonBuilder>()
+            .setComponents(
+                BUTTONS.PREVIOUS_BUTTON.setDisabled(true),
+                BUTTONS.NEXT_BUTTON,
+                BUTTONS.ROLL_AGAIN_BUTTON
+            );
 
         const gachaMessage = await interaction.channel?.send({
             content: `**${gacha[currentGacha].rarity.toUpperCase()} JEFFREY**`,
@@ -123,27 +131,31 @@ export const Roll = {
             return;
         }
 
-        const buttonCollector = gachaMessage.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, componentType: ComponentType.Button, time: 1_800_000 });
+        const buttonCollector = gachaMessage.createMessageComponentCollector({
+            filter: i => i.user.id === interaction.user.id,
+            componentType: ComponentType.Button,
+            time: TIME_IN_MS.THIRTY_MINUTES
+        });
 
         buttonCollector.on('collect', async i => {
 
             if (i.customId === BUTTONS.NEXT_ID) {
                 currentGacha += 1;
-                await checkIfFirstOrLast(currentGacha, rolls);
+                const newRow = await checkIfFirstOrLast(currentGacha, rolls);
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],
-                    components: [row]
+                    components: [newRow]
                 });
             }
-            
+
             if (i.customId === BUTTONS.PREVIOUS_ID) {
                 currentGacha -= 1;
-                await checkIfFirstOrLast(currentGacha, rolls);
+                const newRow = await checkIfFirstOrLast(currentGacha, rolls);
                 await i.update({
                     content: `**${gacha[currentGacha].rarity.toUpperCase()}**`,
                     embeds: [embeds[currentGacha]],
-                    components: [row]
+                    components: [newRow]
                 });
             }
 
@@ -159,7 +171,7 @@ export const Roll = {
                     const rollAgainMsg = await interaction.channel?.send(`How many more rolls would you like to do? (Please type a number, type '0' to cancel)`);
 
                     const msgFilter = (m: Message) => m.author.id === interaction.user.id;
-                    const msgCollector = interaction.channel!.createMessageCollector({ filter: msgFilter, time: 60_000 });
+                    const msgCollector = interaction.channel!.createMessageCollector({ filter: msgFilter, time: TIME_IN_MS.TEN_MINUTES });
 
                     msgCollector.on('collect', async m => {
                         await tryDelete(m);

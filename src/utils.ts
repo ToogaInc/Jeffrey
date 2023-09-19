@@ -1,18 +1,5 @@
-import { Message, HexColorString } from 'discord.js';
+import { Message, HexColorString, ActionRowBuilder, ButtonBuilder } from 'discord.js';
 import { BUTTONS } from './constants/buttons';
-
-export const NUMBER_EMOJIS: string[] = [
-    "1⃣",
-    "2⃣",
-    "3⃣",
-    "4⃣",
-    "5⃣",
-    "6⃣",
-    "7⃣",
-    "8⃣",
-    "9⃣",
-    "🔟"
-];
 
 /**
  * Chooses a random number between min and max
@@ -74,16 +61,18 @@ export async function tryDelete(m: Message): Promise<boolean> {
  * @param {number} currentPos - The current position in an array/list
  * @param {number} max - The highest possible position/number
  */
-export async function checkIfFirstOrLast(currentPos: number, max: number): Promise<void> {
-
-    if (max - currentPos <= 1) {
-        BUTTONS.NEXT_BUTTON.setDisabled(true);
-    } else {
-        BUTTONS.NEXT_BUTTON.setDisabled(false);
-    }
+export async function checkIfFirstOrLast(currentPos: number, max: number): Promise<ActionRowBuilder<ButtonBuilder>> {
+    const row = new ActionRowBuilder<ButtonBuilder>();
     if (currentPos < 1) {
-        BUTTONS.PREVIOUS_BUTTON.setDisabled(true);
+        row.addComponents(BUTTONS.PREVIOUS_BUTTON.setDisabled(true));
     } else {
-        BUTTONS.PREVIOUS_BUTTON.setDisabled(false);
+        row.addComponents(BUTTONS.PREVIOUS_BUTTON.setDisabled(false));
     }
+    if (max - currentPos <= 1) {
+        row.addComponents(BUTTONS.NEXT_BUTTON.setDisabled(true));
+    } else {
+        row.addComponents(BUTTONS.NEXT_BUTTON.setDisabled(false));
+    }
+    row.addComponents(BUTTONS.ROLL_AGAIN_BUTTON);
+    return row;
 };
