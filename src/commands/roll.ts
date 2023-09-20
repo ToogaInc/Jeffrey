@@ -57,9 +57,10 @@ export const Roll = {
             if (rollingAgain) {
                 await interaction.channel?.send('Not enough JeffreyCoins!');
                 return;
+            } else {
+                await interaction.editReply('Not enough JeffreyCoins!');
+                return;
             }
-            await interaction.reply('Not enough JeffreyCoins!');
-            return;
         } else {
             await addOrSubtractWallet(userID, -totalPrice);
         }
@@ -75,7 +76,7 @@ export const Roll = {
             const getLevel = await checkGachaLevel(userID, gacha[i].id);
             if (!getLevel) {
                 console.log(`ERROR: Invalid level for - User: ${userID}, Gacha: ${gacha[i].id}`);
-                await interaction.reply('An error has occured, please contact a developer');
+                await interaction.editReply('An error has occured, please contact a developer');
             }
             gachaLevel.push(getLevel);
 
@@ -127,7 +128,7 @@ export const Roll = {
         });
 
         if (!gachaMessage) {
-            await interaction.reply('Could not send message embed, please contact a developer');
+            await interaction.editReply('Could not send message embed, please contact a developer');
             return;
         }
 
