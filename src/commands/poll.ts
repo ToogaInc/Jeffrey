@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { NUMBER_EMOJIS } from '../utils';
+import { NUMBER_EMOJIS } from '../constants/misc';
 
 const MAX_CHOICES = 5;
 
@@ -27,15 +27,15 @@ export const Poll = {
         }
         const questionString = interaction.options.getString('question');
 
-        if (!questionString || typeof questionString !== 'string') return;
+        if (!questionString) return;
 
         //char limit 
         if (questionString.length > 256) {
-            interaction.reply(`Question is too long. (max 256 char.)`);
+            await interaction.reply(`Question is too long. (max 256 char.)`);
         }
 
         const choices = [];
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= MAX_CHOICES; i++) {
             const choice = interaction.options.get(`choice${i}`)?.value;
             if (choice) {
                 choices.push(choice);
@@ -53,9 +53,11 @@ export const Poll = {
                 name: interaction.user.displayName,
                 iconURL: interaction.user.displayAvatarURL()
             })
-            //Discord embed spacing to look cleaner
+
+            //Discord embed spacing to look nicer
             .addFields(
-                { name: ' ', value: '** **' }
+                { name: ' ', value: '** **' },
+                { name: ' ', value: '** **' },
             );
         for (let i = 0; i < choices.length; i++) {
             embed.addFields(
@@ -63,7 +65,9 @@ export const Poll = {
             )
             if (i + 1 < choices.length) {
                 //more spacing
+                //more spacing
                 embed.addFields(
+                    { name: ' ', value: '** **' },
                     { name: ' ', value: '** **' },
                 )
             }
@@ -83,7 +87,7 @@ export const Poll = {
                 }
             }
         } catch {
-            console.log(`ERROR: Could not send embed in ${interaction.channelId}`);
+            console.log(`ERROR: Could not send embed in ${interaction.channelId})`);
         }
 
     }

@@ -5,8 +5,7 @@ import {
   ClientOptions,
   REST,
   Routes,
-  GatewayIntentBits,
-  ChatInputCommandInteraction
+  GatewayIntentBits
 } from 'discord.js';
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
@@ -29,12 +28,10 @@ const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMembers,
   GatewayIntentBits.GuildMessages,
-  GatewayIntentBits.MessageContent,
-]
+  GatewayIntentBits.MessageContent
+];
 
-const options: ClientOptions = {
-  intents: intents,
-};
+const options: ClientOptions = { intents: intents };
 
 const client = new Client(options);
 
@@ -74,7 +71,7 @@ async function main() {
 Poll.addChoiceOptions();
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
   const { commandName } = interaction;
   const userID = interaction.user.id;
@@ -87,12 +84,12 @@ client.on('interactionCreate', async (interaction) => {
   if (cooldownMap.has(userID) && cooldownMap.get(userID)! > Date.now() && interaction.user.id !== '218823980524634112') {
     const cooldownRemaining = (cooldownMap.get(userID)! - Date.now()) / 1000;
     await interaction.reply(`Please wait ${cooldownRemaining.toFixed(1)} seconds.`);
-    return;
   }
   cooldownMap.set(userID, Date.now() + cooldownTime);
 
-  console.log(`user ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
-    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt}`);
+  console.log(
+    `user ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
+    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt.getUTCDate()}`);
 
   if (commandName === 'ping') {
     await Ping.run(interaction);
@@ -106,13 +103,13 @@ client.on('interactionCreate', async (interaction) => {
     await Cat.run(interaction);
   }
   if (commandName === 'poll') {
-    Poll.run(interaction as ChatInputCommandInteraction);
+    await Poll.run(interaction);
   }
   if (commandName === 'balance') {
-    await Balance.run(interaction as ChatInputCommandInteraction);
+    await Balance.run(interaction);
   }
   if (commandName === 'roll') {
-    await Roll.run(interaction)
+    await Roll.run(interaction);
   }
 });
 
