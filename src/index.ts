@@ -5,8 +5,7 @@ import {
   ClientOptions,
   REST,
   Routes,
-  GatewayIntentBits,
-  ChatInputCommandInteraction
+  GatewayIntentBits
 } from 'discord.js';
 import { Ping } from './commands/ping';
 import { Mock } from './commands/mock';
@@ -14,10 +13,13 @@ import { Cat } from './commands/cat';
 import { Balance } from './commands/balance';
 import { Poll } from './commands/poll';
 import { Roll } from './commands/roll';
+import { DM } from './commands/dm';
 import { DB } from './JeffreyDB';
 
 config();
 
+Poll.addChoiceOptions();
+DM.addChoiceOptions();
 const cooldown = new Map<string, Map<string, number>>();
 const cooldownTime = 5000;
 
@@ -29,8 +31,8 @@ const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMembers,
   GatewayIntentBits.GuildMessages,
-  GatewayIntentBits.MessageContent,
-]
+  GatewayIntentBits.MessageContent
+];
 
 const options: ClientOptions = {
   intents: intents,
@@ -61,7 +63,8 @@ async function main() {
           Cat.info.toJSON(),
           Poll.info.toJSON(),
           Balance.info.toJSON(),
-          Roll.info.toJSON()
+          Roll.info.toJSON(),
+          DM.info.toJSON()
         ]
       }
     );
@@ -71,10 +74,9 @@ async function main() {
     console.error(error);
   }
 }
-Poll.addChoiceOptions();
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
   const { commandName } = interaction;
   const userID = interaction.user.id;
@@ -91,8 +93,8 @@ client.on('interactionCreate', async (interaction) => {
   }
   cooldownMap.set(userID, Date.now() + cooldownTime);
 
-  console.log(`user ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
-    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt}`);
+  console.log(`User ${interaction.user.username} (${userID}) ran the '${commandName}' command | Guild: ${interaction.guild} |`
+    + ` Channel: ${interaction.channel} | Timestamp: ${interaction.createdAt.toUTCString()}`);
 
   if (commandName === 'ping') {
     await Ping.run(interaction);
@@ -106,13 +108,16 @@ client.on('interactionCreate', async (interaction) => {
     await Cat.run(interaction);
   }
   if (commandName === 'poll') {
-    Poll.run(interaction as ChatInputCommandInteraction);
+    Poll.run(interaction);
   }
   if (commandName === 'balance') {
-    await Balance.run(interaction as ChatInputCommandInteraction);
+    await Balance.run(interaction);
   }
   if (commandName === 'roll') {
-    await Roll.run(interaction)
+    await Roll.run(interaction);
+  }
+  if (commandName === 'dm') {
+    await DM.run(interaction);
   }
 });
 
