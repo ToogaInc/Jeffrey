@@ -13,6 +13,9 @@ import { BUTTONS } from '../constants/buttons';
 import { TIME_IN_MS } from '../constants/misc';
 
 const MAX_USERS = 5;
+const MSG_TOO_LONG = '**__Message too long! (limit: 1024 characters)__**';
+const CURRENT_MESSAGE = '__Current Message:__';
+const MESSAGE_RECIPIENTS = '__Message Recipients:__';
 
 export const DM = {
     info: new SlashCommandBuilder()
@@ -80,8 +83,8 @@ export const DM = {
             const embed = new EmbedBuilder()
                 .setDescription(`**Are you sure you want to send this message to these users?**`)
                 .setFields(
-                    { name: '__Message Recipients:__ ', value: users.join(', ') },
-                    { name: '__Current Message:__ ', value: message }
+                    { name: MESSAGE_RECIPIENTS, value: users.join(', ') },
+                    { name: CURRENT_MESSAGE, value: message }
                 );
 
             //confirmation action row with buttons
@@ -147,7 +150,11 @@ export const DM = {
                 .setComponents(BUTTONS.BACK_BUTTON, BUTTONS.YES_BUTTON);
 
 
-            const embedMessage = await interaction.reply({ content: 'Please follow the instructions below!', embeds: [startEmbed], components: [startRow] });
+            const embedMessage = await interaction.reply({
+                content: 'Please follow the instructions below!',
+                embeds: [startEmbed],
+                components: [startRow]
+            });
 
             if (!embedMessage) {
                 await interaction.reply('An error has occurred, please contact a developer.');
@@ -164,7 +171,6 @@ export const DM = {
             let userCollector: MessageCollector;
             let memberList: User[] = [];
             let DM = '';
-            const msgTooLong = '**__Message too long! (limit: 1024 characters)__**';
 
             buttonCollector.on('collect', async i => {
 
@@ -181,9 +187,9 @@ export const DM = {
                         if (m.content) {
                             DM = m.content;
                             if (DM.length > 1024) {
-                                DM = msgTooLong;
+                                DM = MSG_TOO_LONG;
                             }
-                            addMsgEmbed.setFields({ name: '__Current Message:__ ', value: DM });
+                            addMsgEmbed.setFields({ name: CURRENT_MESSAGE, value: DM });
                         } else {
                             await interaction.channel?.send('Could not read message.');
                         }
@@ -225,14 +231,14 @@ export const DM = {
                                     memberList.push(member.user);
                                 }
                             }
-                            addUsersEmbed.setFields({ name: '__Message Recipients:__ ', value: memberList.join(', ') });
+                            addUsersEmbed.setFields({ name: MESSAGE_RECIPIENTS, value: memberList.join(', ') });
                         }
                         await interaction.editReply({ embeds: [addUsersEmbed], components: [addUsersRow] });
                     });
                 }
 
                 else if (i.customId === BUTTONS.CANCEL_ID) {
-                    await interaction.editReply({ content: 'Process canceled', components: [] });
+                    await i.update({ content: 'Process canceled', components: [] });
                     console.log('Stopped all Collectors');
                     return;
                 }
@@ -248,14 +254,13 @@ export const DM = {
                             { name: ' ', value: '- Finally, click the "Send" button when you are finished.' }
                         );
                     if (memberList.length > 0) {
-                        startEmbed.addFields({ name: '__Message Recipients:__ ', value: memberList.join(', ') });
+                        startEmbed.addFields({ name: MESSAGE_RECIPIENTS, value: memberList.join(', ') });
                     }
-                    if (DM.length > 0 && DM !== msgTooLong) {
-                        startEmbed.addFields({ name: '__Current Message:__ ', value: DM });
+                    if (DM.length > 0 && DM !== MSG_TOO_LONG) {
+                        startEmbed.addFields({ name: CURRENT_MESSAGE, value: DM });
                     }
 
-                    await interaction.editReply({ embeds: [startEmbed], components: [startRow] });
-                    await i.update({});
+                    await i.update({ embeds: [startEmbed], components: [startRow] });
                 }
 
                 else if (i.customId === BUTTONS.BACK_ID) {
@@ -266,29 +271,29 @@ export const DM = {
                 }
 
                 else if (i.customId === BUTTONS.RESET_ID) {
+                    await i.deferUpdate()
                     memberList.length = 0;
                     addUsersEmbed.setDescription('Please type the names of the user(s) you\'d like me to DM!');
                     addUsersEmbed.spliceFields(0, 1);
-                    await i.update({ components: [addUsersRow] });
-                    await interaction.editReply({ embeds: [addUsersEmbed] });
+                    await i.update({ embeds: [addUsersEmbed], components: [addUsersRow] });
                 }
 
                 else if (i.customId === BUTTONS.SEND_ID) {
+                    await i.deferUpdate();
                     if (!DM || memberList.length < 1) {
                         await interaction.channel?.send(`No message/no user specified!`);
-                        await i.update({})
+                        return;
                     } else {
                         startEmbed.setDescription(`**Are you sure you want to send this message to these users?**`);
                         startEmbed.setFields(
-                            { name: '__Message Recipients:__ ', value: memberList.join(', ') },
-                            { name: '__Current Message:__ ', value: DM }
+                            { name: MESSAGE_RECIPIENTS, value: memberList.join(', ') },
+                            { name: CURRENT_MESSAGE, value: DM }
                         );
                         await interaction.editReply({ embeds: [startEmbed], components: [confirmRow] });
-                        await i.update({ components: [confirmRow] });
                     }
                 } else if (i.customId === BUTTONS.YES_ID) {
                     buttonCollector.stop();
-                    await i.update({})
+                    await i.deferUpdate();
                     await sendDMs(DM, memberList);
                 }
             });
@@ -303,7 +308,7 @@ export const DM = {
         async function sendDMs(m: string, users: User[]): Promise<void> {
             const DMEmbed = new EmbedBuilder()
                 .addFields(
-                    { name: '__Message Content:__ ', value: m },
+                    { name: MESSAGE_RECIPIENTS, value: m },
                     { name: ' ', value: '--END--' },
                     {
                         name: ' ', value: `** **\n*__Note:__ This bot cannot recieve DMs. `
