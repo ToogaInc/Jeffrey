@@ -47,9 +47,11 @@ export const DM = {
         let higherUp = false;
         const getRole = interaction.guild.roles.cache;
         const role = [
+            getRole.find(role => role.name.toLowerCase() === 'administrator'),
             getRole.find(role => role.name.toLowerCase() === 'moderator'),
             getRole.find(role => role.name.toLowerCase() === 'officer'),
-            getRole.find(role => role.name.toLowerCase() === 'head raid leader')
+            getRole.find(role => role.name.toLowerCase() === 'head raid leader'),
+            getRole.find(role => role.name.toLowerCase() === 'head organizer')
         ];
         const commandUser = await interaction.guild.members.fetch(userID);
         for (const currentRole of role) {
