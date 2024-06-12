@@ -8,9 +8,9 @@ import {
     MessageCollector,
     User
 } from 'discord.js';
-import { tryDelete, tryToDMEmbed } from '../utils';
-import { BUTTONS } from '../constants/buttons';
-import { TIME_IN_MS } from '../constants/misc';
+import { tryDelete, tryToDMEmbed } from '../utilities/miscUtils';
+import { BUTTONS } from '../constants/buttonConstants';
+import { TIME_IN_MS } from '../constants/miscConstants';
 
 const MAX_USERS = 5;
 const MSG_TOO_LONG = '**__Message too long! (limit: 1024 characters)__**';
