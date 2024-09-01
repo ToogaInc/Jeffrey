@@ -6,7 +6,8 @@ import {
     ButtonBuilder,
     ComponentType,
     MessageCollector,
-    User
+    User,
+    GuildMember
 } from 'discord.js';
 import { tryDelete, tryToDMEmbed } from '../utils';
 import { BUTTONS } from '../constants/buttons';
@@ -50,13 +51,13 @@ export const DM = {
             getRole.find(role => role.name.toLowerCase() === 'administrator'),
             getRole.find(role => role.name.toLowerCase() === 'moderator'),
             getRole.find(role => role.name.toLowerCase() === 'officer'),
-            getRole.find(role => role.name.toLowerCase() === 'head raid leader'),
-            getRole.find(role => role.name.toLowerCase() === 'head organizer')
+            getRole.find(role => role.name.toLowerCase() === 'head organizer'),
+            getRole.find(role => role.name.toLowerCase() === 'senior head organizer')
         ];
         const commandUser = await interaction.guild.members.fetch(userID);
         for (const currentRole of role) {
             if (!currentRole) {
-                console.log(`ERROR finding higher up role(s) for balance command`);
+                console.log(`ERROR finding higher up role: ${currentRole} for DM command`);
                 continue;
             }
             if (commandUser.roles.cache.has(currentRole.id)) {
@@ -65,7 +66,7 @@ export const DM = {
             }
         }
         if (!higherUp) {
-            await interaction.reply('Only officer+ can use this command!');
+            await interaction.reply('Only higher-ups can use this command!');
             return;
         }
 
@@ -213,25 +214,38 @@ export const DM = {
 
                         for (const currentWord of words) {
                             if (memberList.length >= MAX_USERS) {
-                                await interaction.channel?.send(`Sorry, I can only message **5** user's at once!`);
+                                await interaction.channel?.send(`Sorry, I can only message **5** users at once!`);
                                 return;
                             }
+
+                            const lowercaseCurrentWord = currentWord.toLowerCase();
+
                             let member = interaction.guild?.members.cache.find((member) =>
-                                member.user.username === currentWord ||
-                                member.user.displayName === currentWord ||
-                                member.user.id === currentWord
-                            ); if (!member) {
-                                const fetchMember = await interaction.guild?.members.fetch({ query: currentWord, limit: 1 });
-                                if (fetchMember) {
-                                    member = fetchMember.first();
+                                member.user.username.toLowerCase() === lowercaseCurrentWord ||
+                                member.user.displayName.toLowerCase() === lowercaseCurrentWord ||
+                                member.user.id === lowercaseCurrentWord
+                            );
+
+                            if (!member) {
+                                try {
+                                    const fetchMember = await interaction.guild?.members.fetch({ query: lowercaseCurrentWord, limit: 1 });
+                                    if (fetchMember) {
+                                        member = fetchMember.first();
+                                    }
+                                } catch (error) {
+                                    console.error("Error fetching member:", error);
                                 }
                             }
+
                             if (member) {
                                 if (memberList.includes(member.user)) {
                                     continue;
                                 } else {
                                     memberList.push(member.user);
                                 }
+                            } else {
+                                await interaction.channel?.send(`Could not find member: ${currentWord}`);
+                                return;
                             }
                             addUsersEmbed.setFields({ name: MESSAGE_RECIPIENTS, value: memberList.join(', ') });
                         }
@@ -241,7 +255,6 @@ export const DM = {
 
                 else if (i.customId === BUTTONS.CANCEL_ID) {
                     await i.update({ content: 'Process canceled', components: [] });
-                    console.log('Stopped all Collectors');
                     return;
                 }
 
@@ -277,7 +290,7 @@ export const DM = {
                     memberList.length = 0;
                     addUsersEmbed.setDescription('Please type the names of the user(s) you\'d like me to DM!');
                     addUsersEmbed.spliceFields(0, 1);
-                    await i.update({ embeds: [addUsersEmbed], components: [addUsersRow] });
+                    await interaction.editReply({ embeds: [addUsersEmbed], components: [addUsersRow] });
                 }
 
                 else if (i.customId === BUTTONS.SEND_ID) {
